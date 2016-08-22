@@ -1,10 +1,10 @@
 bezier curve support
 multi-part per pattern 
 remove "make" from start of closure functions
-BUG: preview is too tall (see testpattern with pagesize 5x5)
 
 --- below = done ---
 
 add part/pattern titles to preview page
 add grid lines to preview
 add joint indicators to lifesize poarts
+BUG: preview is too tall (see testpattern with pagesize 5x5)

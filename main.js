@@ -229,7 +229,6 @@ function renderPartPaged(pattern, part, pdfdoc, pageSize, pageMargin) {
 			drawShape(pdfdoc, shape);
 		});
 
-		console.log('LOC: '+(pageSize.y-pageMargin.y));
 		// draw joint labels
 		var fontSize=12;
 		var extraSpace=4;
@@ -256,14 +255,20 @@ function renderPartPaged(pattern, part, pdfdoc, pageSize, pageMargin) {
 // }
 function renderPartScaled(pattern, part, pdfdoc, pageSize, pageMargin, gridSpacing, origUnit) 
 {
-	// the amount of space (in points) available in which to draw the preview
-	// note that the preview will not necessarily be this size
-	var availWidth = pageSize.x - pageMargin.x*2;
-	var availHeight = pageSize.y - pageMargin.y*2;
-
 	pdfdoc.text('Pattern: '+pattern.title, pageMargin.x, pageMargin.y);
 	pdfdoc.text('Part: '+part.title);
 	pdfdoc.text('Units: '+origUnit);
+	var textBottom = pdfdoc.y;
+	var textHeight = pdfdoc.y - pageMargin.y;
+
+	// the amount of space (in points) available in which to draw the preview
+	// note that the preview will not necessarily be this size
+	var availWidth = pageSize.x - pageMargin.x*2;
+	var availHeight = pageSize.y - pageMargin.y*2 - textHeight;
+
+	// start drawing out of the margins and title text area
+	var startX = pageMargin.x;
+	var startY = textBottom;
 
 	// scale the part to within the available region on the page
 	var scaled = part.scaleWithinProp(availWidth, availHeight);
@@ -271,20 +276,17 @@ function renderPartScaled(pattern, part, pdfdoc, pageSize, pageMargin, gridSpaci
 	// number of points between grid lines scaled for the preview
 	gridSpacing = scaled.scaleFactor * gridSpacing;
 
-	// move everything out of the margins and title area
-	var startX = pageMargin.x;
-	// pdfdoc.y is where the above pdfdoc.text() calls ended their drawing
-	var startY = pdfdoc.y;
+	// translate all shapes to fit the preview area
 	var xlate = makexlateShape(startX, startY);
 	var xshapes = scaled.scaledPart.shapes.map(xlate);
 
-	// draw the moved shapes
+	// draw the translated-for-preview shapes
 	xshapes.map( function(xshape) {
 		drawShape(pdfdoc, xshape);
 	});
 
 	// draw the vertical grid lines
-	// TODO: the "space" option to dash() doesn't seem to do anything... why not?
+	// the "space" option to dash() doesn't seem to do anything... PDFKit problem?
 	pdfdoc.dash(length=2, space=10);
 	pdfdoc.strokeOpacity(0.2);
 	var gridEndX = startX + scaled.scaledPart.height();
@@ -343,7 +345,7 @@ function paginate(drawingSize, windowSize) {
 		}
 	}
 	
-	console.log(pages);
+	//console.log(pages);
 	var getJointLabel = jointLabel();
 	
 	for( var iy=0; iy<pagesy; iy++ ) {
@@ -384,13 +386,12 @@ function paginate(drawingSize, windowSize) {
 		}
 	}
 	
-	console.log(pages);
+	//console.log(pages);
 
 	// flatten out the above 2 dimensional pages array
 	var pages_flat = [];
 	pages.map( function (row) {
 		row.map( function (page) {
-			console.log('flatten: '+page.xlx+':'+page.xly);
 			pages_flat.push(page);
 		});
 	});
@@ -486,16 +487,16 @@ function logPart(part, f) {
 function main() {
 	pattern = testpattern.generate();
 
-	/*
 	var pageSize = {
 		x: 8.5*72,
 		y: 11*72
 	};
-	*/
+	/*
 	var pageSize = {
 		x: 5*72,
 		y: 5*72
 	};
+	*/
 	var pageMargin = {
 		x: 0.5*72,
 		y: 0.5*72
