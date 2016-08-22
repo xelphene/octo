@@ -1,0 +1,9 @@
+add joint indicators to lifesize poarts
+bezier curve support
+multi-part per pattern 
+remove "make" from start of closure functions
+
+--- below = done ---
+
+add part/pattern titles to preview page
+add grid lines to preview
