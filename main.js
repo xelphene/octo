@@ -60,7 +60,7 @@ function drawBezier(doc, pt, origin, bezier) {
 };
 
 function drawShape(doc, shape) {
-	console.log('drawShape: '+shape.toString());
+	//console.log('drawShape: '+shape.toString());
 	if( shape instanceof geom.Bezier ) {
 		drawBezier(doc, shape );
 	} else if ( shape instanceof geom.Line ) {
@@ -190,15 +190,17 @@ function renderPartPaged(pattern, part, pdfdoc, pageSize, pageMargin) {
 	console.log('pageSize.x: '+pageSize.x+'  pageSize.y: '+pageSize.y);
 	console.log('pageMargin.x: '+pageMargin.x+'  pageMargin.y: '+pageMargin.y);
 	console.log('windowSize.x: '+windowSize.x+'  windowSize.y: '+windowSize.y);
-	var xlations = paginate(part.size(), windowSize);
+	var pages = paginate(part.size(), windowSize);
 	
 	// marginXlate() will move a shape to accomodate margins
 	var marginXlate = makexlateShape(pageMargin.x, pageMargin.y);
 	
-	xlations.forEach( function(xl, index) {
-		console.log('***** new page '+(index)+' / '+xlations.length+' ****');
-		console.log('  xlation for this page: '+xl.x+','+xl.y);
-
+	pages.forEach( function(page, index) {
+		/*
+		console.log('***** new page '+(index)+' / '+pages.length+' ****');
+		console.log('  xlation for this page: '+page.xlx+','+page.xly);
+		*/
+		
 		drawPageMargins(pdfdoc, pageSize, pageMargin);
 		pdfdoc.rect(
 			pageMargin.x, pageMargin.y, 
@@ -207,26 +209,40 @@ function renderPartPaged(pattern, part, pdfdoc, pageSize, pageMargin) {
 		pdfdoc.clip();
 
 		// move all the shapes so the particular region for this page will
-		// be drawn in the page
-		var pageShapes = part.shapes.map( makexlateShape(-xl.x, -xl.y) );
+		// be drawn in the page.  the excess that's off the page will just
+		// be ignored by PDFKit
+		var pageShapes = part.shapes.map( makexlateShape(-page.xlx, -page.xly) );
 
 		// shift again to accomodate margins
 		var windowShapes = pageShapes.map( makexlateShape(pageMargin.x,pageMargin.y) );
 
+		/*
 		// log the translated shapes
 		console.log('  shapes xlated for this page:');
 		windowShapes.map( function(s) { 
 			console.log('    '+s); 
 		} );
+		*/
 
 		// actually draw the shapes
 		windowShapes.map( function(shape) {
 			drawShape(pdfdoc, shape);
 		});
 
+		console.log('LOC: '+(pageSize.y-pageMargin.y));
+		// draw joint labels
+		var fontSize=12;
+		var extraSpace=4;
+		pdfdoc.fontSize(fontSize);
+		pdfdoc.text(page.top, pageSize.x/2, pageMargin.y+extraSpace);
+		pdfdoc.text(page.bot, pageSize.x/2, pageSize.y-pageMargin.y-fontSize-extraSpace );
+		pdfdoc.text(page.left, pageMargin.x+extraSpace, pageSize.y/2);
+		pdfdoc.text(page.right, pageSize.x - pageMargin.x - fontSize - extraSpace, pageSize.y/2);
+		//pdfdoc.text(page.bot, pageSize.x/2, pageSize.y-pageMargin.y);
 
-		if( index < (xlations.length-1) ) {
-			console.log('adding a new page to the doc');
+		// if another page comes after this one, add a new page to the doc
+		if( index < (pages.length-1) ) {
+			//console.log('adding a new page to the doc');
 			pdfdoc.addPage();
 		}
 	});
@@ -288,25 +304,99 @@ function renderPartScaled(pattern, part, pdfdoc, pageSize, pageMargin, gridSpaci
 	pdfdoc.undash();
 };
 
-// given a box containing stuff to be drawn and the size of the area in
-// which to draw on each page, compute translations for each page on the
-// drawing.  These translations describe how to reposition the drawing so a
-// particular part will be visible on a particular page.
+function jointLabel() {
+	var curJointLabel = 64; // (before "A")
+	return function () {
+		curJointLabel++;
+		return String.fromCharCode(curJointLabel);
+	};
+};
+
+// given the size of the stuff to be drawn (bounding box) and the size of
+// the area in which to draw on each page, compute translations for each
+// page on the drawing as well as labels for each edge (to line them up and
+// assemble after printing out and cutting out).  The translations
+// describe how to reposition the drawing so a particular part will be
+// visible on a particular page.
 function paginate(drawingSize, windowSize) {
 	pagesx = Math.ceil(drawingSize.x / windowSize.x)
 	pagesy = Math.ceil(drawingSize.y / windowSize.y)
 	
 	var xlations = [];
-	
+	var pages = [];
+
 	for( var iy=0; iy<pagesy; iy++ ) {
+		pages.push([]);
 		for( var ix=0; ix<pagesx; ix++ ) {
+			pages[iy].push({
+				top: '',
+				bot: '',
+				left: '',
+				right: '',
+				xlx: ix * windowSize.x,
+				xly: iy * windowSize.y
+			});
 			xlations.push({
 				x: ix * windowSize.x,
 				y: iy * windowSize.y
 			});
 		}
 	}
-	return xlations;
+	
+	console.log(pages);
+	var getJointLabel = jointLabel();
+	
+	for( var iy=0; iy<pagesy; iy++ ) {
+		for( var ix=0; ix<pagesx; ix++ ) {
+
+			if( pages[iy][ix].right == '' ) {
+				if( pages[iy][ix+1] ) {
+					
+					// there is a page to the right of me and I haven't been
+					// assigned a right joint label yet so assign the one
+					// from this page's neighbor or generate a joint label
+					// for both
+					if( pages[iy][ix+1].left != '' ) {
+						pages[iy][ix].right = pages[iy][ix+1].left
+					} else {
+						var label = getJointLabel();
+						pages[iy][ix].right = label;
+						pages[iy][ix+1].left = label;
+					}
+				}
+			}
+
+			if( pages[iy][ix].bot == '' ) {
+				if( pages[iy+1] ) {
+					// there is a page below me and I haven't been
+					// assigned a top joint label yet so assign the one
+					// from this page's neighbor or generate a joint label
+					// for both
+					if( pages[iy+1][ix].top != '' ) {
+						pages[iy][ix].bot = pages[iy+1][ix].top;
+					} else {
+						var label = getJointLabel();
+						pages[iy][ix].bot = label;
+						pages[iy+1][ix].top = label;
+					}
+				}
+			}
+		}
+	}
+	
+	console.log(pages);
+
+	// flatten out the above 2 dimensional pages array
+	var pages_flat = [];
+	pages.map( function (row) {
+		row.map( function (page) {
+			console.log('flatten: '+page.xlx+':'+page.xly);
+			pages_flat.push(page);
+		});
+	});
+
+	//return xlations;
+	return pages_flat;
 };
 
 // given a part in a pattern, transform all shapes to PDF coordinates (1/72
@@ -396,9 +486,15 @@ function logPart(part, f) {
 function main() {
 	pattern = testpattern.generate();
 
+	/*
 	var pageSize = {
 		x: 8.5*72,
 		y: 11*72
+	};
+	*/
+	var pageSize = {
+		x: 5*72,
+		y: 5*72
 	};
 	var pageMargin = {
 		x: 0.5*72,
@@ -406,7 +502,8 @@ function main() {
 	};
 
 	var pageOptions = {
-		size: [pageSize.x, pageSize.y]
+		size: [pageSize.x, pageSize.y],
+		margin: 0
 	};
 
 	doc = new PDFDocument(pageOptions);
