@@ -141,40 +141,6 @@ function computeDocSize(pattern, part) {
 	};	
 };
 
-// return a function which will translate a Point by the specified number
-// of (arbitrary) units
-function makexlatePoint(dx,dy) {
-	return function (point) {
-		return new geom.Point(
-			x = point.x + dx,
-			y = point.y + dy
-		);
-	}
-};
-
-// return a function which will translate a Shape by the specified number of
-// (arbitrary) units
-function makexlateShape(x,y) {
-	xlatePoint = makexlatePoint(x,y);
-	return function (shape) {
-		if( shape instanceof geom.Line ) {
-			return new geom.Line(
-				start = xlatePoint(shape.start),
-				end = xlatePoint(shape.end)
-			);
-		} else if( shape instanceof geom.Bezier ) {
-			return new geom.Bezier(
-				start = xlatePoint(shape.start),
-				sctl = xlatePoint(shape.sctl),
-				ectl = xlatePoint(shape.ectl),
-				end = xlatePoint(shape.end)
-			);
-		} else {
-			throw new Error("dont know how to translate a "+shape);
-		}
-	};
-};
-
 function drawPageMargins(pdfdoc, pageSize, pageMargin) {
 	pdfdoc.moveTo(pageMargin.x, pageMargin.y);
 	pdfdoc.lineTo( pageSize.x-pageMargin.x, pageMargin.y);
@@ -201,9 +167,6 @@ function renderPartPaged(pattern, part, pdfdoc, pageSize, pageMargin) {
 	console.log('windowSize.x: '+windowSize.x+'  windowSize.y: '+windowSize.y);
 	var pages = paginate(part.size(), windowSize);
 	
-	// marginXlate() will move a shape to accomodate margins
-	var marginXlate = makexlateShape(pageMargin.x, pageMargin.y);
-	
 	pages.forEach( function(page, index) {
 		/*
 		console.log('***** new page '+(index)+' / '+pages.length+' ****');
@@ -220,10 +183,14 @@ function renderPartPaged(pattern, part, pdfdoc, pageSize, pageMargin) {
 		// move all the shapes so the particular region for this page will
 		// be drawn in the page.  the excess that's off the page will just
 		// be ignored by PDFKit
-		var pageShapes = part.shapes.map( makexlateShape(-page.xlx, -page.xly) );
+		var pageShapes = part.shapes.map( function(s) { 
+			return s.xlate( -page.xlx, -page.xly );
+		});
 
 		// shift again to accomodate margins
-		var windowShapes = pageShapes.map( makexlateShape(pageMargin.x,pageMargin.y) );
+		var windowShapes = pageShapes.map( function(s) {
+			return s.xlate( pageMargin.x, pageMargin.y );
+		});
 
 		/*
 		// log the translated shapes
@@ -286,8 +253,9 @@ function renderPartScaled(pattern, part, pdfdoc, pageSize, pageMargin, gridSpaci
 	gridSpacing = scaled.scaleFactor * gridSpacing;
 
 	// translate all shapes to fit the preview area
-	var xlate = makexlateShape(startX, startY);
-	var xshapes = scaled.scaledPart.shapes.map(xlate);
+	var xshapes = scaled.scaledPart.shapes.map( function(s) {
+		return s.xlate(startX, startY);
+	});
 
 	// draw the translated-for-preview shapes
 	xshapes.map( function(xshape) {
@@ -425,8 +393,11 @@ function coordXform(pattern, part) {
 	var xly = pt(part.bbox.top);
 	// always move everything right by the left's distance from the x-axis
 	var xlx = pt(-part.bbox.left);
-	xlateShape = makexlateShape(xlx, xly );
-	shapes = shapes.map(xlateShape);
+	
+	shapes = shapes.map( function(s) {
+		return s.xlate(xlx, xly);
+	});
+	
 	//shapes = shapes.map( function(s) { return xlateShape(shape, xlx, xly) } );
 	console.log('--- translated + transformed shapes ---');
 	shapes.map(function (s) { console.log('    '+s.toString()) } );

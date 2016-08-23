@@ -32,6 +32,13 @@ Line.prototype.scaleBy = function(sx, sy) {
 	);
 };
 
+Line.prototype.xlate = function(dx, dy) {
+	return new Line(
+		start = P( this.start.x+dx, this.start.y+dy ),
+		end = P( this.end.x+dx, this.end.y+dy )
+	);
+};
+
 /////////////////////////////////////////////////////////////
 
 var Bezier = function(start, sctl, ectl, end) {
@@ -68,6 +75,15 @@ Bezier.prototype.scaleBy = function(sx, sy) {
 		sctl = new Point( this.sctl.x*sx, this.sctl.y*sy ),
 		ectl = new Point( this.ectl.x*sx, this.ectl.y*sy ),
 		end = new Point( this.end.x*sx, this.end.y*sy )
+	);
+};
+
+Bezier.prototype.xlate = function(dx, dy) {
+	return new Bezier(
+		start = P( this.start.x+dx, this.start.y+dy ),
+		sctl = P( this.sctl.x+dx, this.sctl.y+dy ),
+		ectl = P( this.ectl.x+dx, this.ectl.y+dy ),
+		end =  P( this.end.x+dx, this.end.y+dy )
 	);
 };
 
