@@ -11,9 +11,6 @@ function drawLine(doc, line) {
 	var s = line.start;
 	var e = line.end;
 
-	//console.log('drawLine: sx='+ s.x +' sy='+s.y+' ex='+e.x+' ey='+e.y);
-	
-	// draw the shape
 	doc.moveTo( s.x, s.y );
 	doc.lineTo( e.x, e.y );
 	doc.stroke();
@@ -21,44 +18,14 @@ function drawLine(doc, line) {
 };
 
 function drawBezier(doc, bezier) {
-	var sx =  bezier.start.x;
-	var sy =  bezier.start.y;
-	var scx = bezier.sctl.x;
-	var scy = bezier.sctl.y;
-	var ecx = bezier.ectl.x;
-	var ecy = bezier.ectl.y;
-	var ex =  bezier.end.x;
-	var ey =  bezier.end.y;
-
-	/*
-	// invert the Y axes
-	// in geom, Y+ is upward. in PDF, Y+ is downward.
-	sy = -sy;
-	scy = -scy;
-	ecy = -ecy;
-	ey = -ey;
-
-	// transform to PDF coordinate space
-	var ox = pt( origin.x );
-	var oy = pt( origin.y );
-	sx += ox;
-	sy += oy;
-	scx += ox;
-	scy += oy;
-	ecx += ox;
-	ecy += oy;
-	ex += ox;
-	ey += oy;
-	*/
-
-	// draw the shape
-	doc.moveTo( sx, sy );
+	doc.moveTo( bezier.start.x, bezier.start.y );
 	doc.bezierCurveTo(
-		scx, scy,
-		ecx, ecy,
-		ex, ey
+		bezier.sctl.x, bezier.sctl.y,
+		bezier.ectl.x, bezier.ectl.y,
+		bezier.end.x, bezier.end.y
 	);
 	doc.stroke();
+
 };
 
 function drawShape(doc, shape) {
@@ -141,15 +108,18 @@ function computeDocSize(pattern, part) {
 	};	
 };
 
+// draw dashed lines at the page margin
 function drawPageMargins(pdfdoc, pageSize, pageMargin) {
 	pdfdoc.moveTo(pageMargin.x, pageMargin.y);
 	pdfdoc.lineTo( pageSize.x-pageMargin.x, pageMargin.y);
 	pdfdoc.lineTo( pageSize.x-pageMargin.x, pageSize.y-pageMargin.y);
 	pdfdoc.lineTo( pageMargin.x, pageSize.y-pageMargin.y);
 	pdfdoc.lineTo( pageMargin.x, pageMargin.y);
+	pdfdoc.strokeOpacity(0.5);
 	pdfdoc.dash(5);
 	pdfdoc.stroke();
 	pdfdoc.undash();
+	pdfdoc.strokeOpacity(1.0);
 };
 
 // render one Part from a Pattern into a PDF file of multiple pages, as many
@@ -173,6 +143,7 @@ function renderPartPaged(pattern, part, pdfdoc, pageSize, pageMargin) {
 		console.log('  xlation for this page: '+page.xlx+','+page.xly);
 		*/
 		
+		// draw the page margins and cut off anything beyond them
 		drawPageMargins(pdfdoc, pageSize, pageMargin);
 		pdfdoc.rect(
 			pageMargin.x, pageMargin.y, 
@@ -186,7 +157,6 @@ function renderPartPaged(pattern, part, pdfdoc, pageSize, pageMargin) {
 		var pageShapes = part.shapes.map( function(s) { 
 			return s.xlate( -page.xlx, -page.xly );
 		});
-
 		// shift again to accomodate margins
 		var windowShapes = pageShapes.map( function(s) {
 			return s.xlate( pageMargin.x, pageMargin.y );
