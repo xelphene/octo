@@ -62,6 +62,15 @@ Bezier.prototype.toString = function() {
 	);
 }
 
+Bezier.prototype.scaleBy = function(sx, sy) {
+	return new Bezier(
+		start = new Point( this.start.x*sx, this.start.y*sy ),
+		sctl = new Point( this.sctl.x*sx, this.sctl.y*sy ),
+		ectl = new Point( this.ectl.x*sx, this.ectl.y*sy ),
+		end = new Point( this.end.x*sx, this.end.y*sy )
+	);
+};
+
 /////////////////////////////////////////////////////////////
 
 exports.Point = Point;

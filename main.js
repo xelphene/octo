@@ -20,16 +20,17 @@ function drawLine(doc, line) {
 	
 };
 
-function drawBezier(doc, pt, origin, bezier) {
-	var sx = pt( bezier.start.x );
-	var sy = pt( bezier.start.y );
-	var scx = pt( bezier.sctl.x );
-	var scy = pt( bezier.sctl.y );
-	var ecx = pt( bezier.ectl.x );
-	var ecy = pt( bezier.ectl.y );
-	var ex = pt( bezier.end.x );
-	var ey = pt( bezier.end.y );
+function drawBezier(doc, bezier) {
+	var sx =  bezier.start.x;
+	var sy =  bezier.start.y;
+	var scx = bezier.sctl.x;
+	var scy = bezier.sctl.y;
+	var ecx = bezier.ectl.x;
+	var ecy = bezier.ectl.y;
+	var ex =  bezier.end.x;
+	var ey =  bezier.end.y;
 
+	/*
 	// invert the Y axes
 	// in geom, Y+ is upward. in PDF, Y+ is downward.
 	sy = -sy;
@@ -48,7 +49,8 @@ function drawBezier(doc, pt, origin, bezier) {
 	ecy += oy;
 	ex += ox;
 	ey += oy;
-	
+	*/
+
 	// draw the shape
 	doc.moveTo( sx, sy );
 	doc.bezierCurveTo(
@@ -159,7 +161,14 @@ function makexlateShape(x,y) {
 			return new geom.Line(
 				start = xlatePoint(shape.start),
 				end = xlatePoint(shape.end)
-			)
+			);
+		} else if( shape instanceof geom.Bezier ) {
+			return new geom.Bezier(
+				start = xlatePoint(shape.start),
+				sctl = xlatePoint(shape.sctl),
+				ectl = xlatePoint(shape.ectl),
+				end = xlatePoint(shape.end)
+			);
 		} else {
 			throw new Error("dont know how to translate a "+shape);
 		}
@@ -487,16 +496,9 @@ function logPart(part, f) {
 function main() {
 	pattern = testpattern.generate();
 
-	var pageSize = {
-		x: 8.5*72,
-		y: 11*72
-	};
-	/*
-	var pageSize = {
-		x: 5*72,
-		y: 5*72
-	};
-	*/
+	//var pageSize = { x: 8.5*72, y: 11*72 };
+	var pageSize = { x: 5*72, y: 5*72 };
+
 	var pageMargin = {
 		x: 0.5*72,
 		y: 0.5*72

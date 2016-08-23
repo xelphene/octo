@@ -1,6 +1,7 @@
 bezier curve support
 multi-part per pattern 
 remove "make" from start of closure functions
+turn makexlateShape / makexlatePoint into methods on geom objects
 
 --- below = done ---
 

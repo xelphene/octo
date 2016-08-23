@@ -45,6 +45,14 @@ function generate() {
 	);
 	// end corner markers
 
+	// bezier curve test
+	part.addShape(
+		new geom.Bezier(
+			start = P(1,10), sctl = P(1,6),
+			ectl = P(2,4), end = P(2,0)
+		)
+	);
+
 	/*
 	// "L" in lower left
 	part.addShape(
