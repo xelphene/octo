@@ -261,10 +261,10 @@ function jointLabel() {
 	};
 };
 
-// given the size of the stuff to be drawn (bounding box) and the size of
-// the area in which to draw on each page, compute translations for each
-// page on the drawing as well as labels for each edge (to line them up and
-// assemble after printing out and cutting out).  The translations
+// given the size of the stuff to be drawn (drawingSize) and the size of the
+// area in which to draw on each page (windowSize), compute translations for
+// each page on the drawing as well as labels for each edge (to line them up
+// and assemble after printing out and cutting out).  The translations
 // describe how to reposition the drawing so a particular part will be
 // visible on a particular page.
 function paginate(drawingSize, windowSize) {
