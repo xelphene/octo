@@ -6,6 +6,7 @@ const Point = geom.Point;
 const testpattern = require('./testpattern.js');
 const Pattern = require('./pattern.js').Pattern;
 const Part = require('./pattern.js').Part;
+const loadFromYaml = require('./pattern.js').loadFromYaml;
 
 function drawLine(doc, line) {
 	var s = line.start;
@@ -82,13 +83,13 @@ function makexformShape(unit) {
 // return a function needed to convert lengths of the given unit
 // ("inch","mm") to points (1/72 inch)
 function makept(unit) {
-	if( pattern.unit == 'inch' ) {
+	if( unit == 'inch' ) {
 		return function (length) { 
 			// TODO: verify that length is a number
 			return length*72; 
 		};
 	} else {
-		throw new Error('pattern has unknown unit: '+pattern.unit);
+		throw new Error('pattern has unknown unit: '+unit);
 	}
 };
 
@@ -405,7 +406,7 @@ function logPattern(p, f) {
 	f('Pattern title: '+p.title);
 	f('Pattern units: '+p.unit);
 	p.parts.forEach( function(part, index) {
-		f('Part '+(index+1)+' / '+p.parts.length);
+		f('Part '+(index+1)+' / '+p.parts.length+': '+part.title);
 		f('  Bounding Box:');
 		f('    top : '+part.bbox.top);
 		f('    bot : '+part.bbox.bottom);
@@ -435,10 +436,22 @@ function logPart(part, f) {
 };
 
 function main() {
-	pattern = testpattern.generate();
 
-	//var pageSize = { x: 8.5*72, y: 11*72 };
-	var pageSize = { x: 5*72, y: 5*72 };
+	if( process.argv.length != 4 ) {
+		console.log('usage: '+process.argv[1]+' <yaml input file> <pdf output file>');
+		return;
+	};
+
+	var yamlIn = process.argv[2];
+	var pdfOut = process.argv[3];
+
+	var pattern = loadFromYaml(yamlIn);
+	logPattern(pattern);
+
+	//pattern = testpattern.generate();
+
+	var pageSize = { x: 8.5*72, y: 11*72 };
+	//var pageSize = { x: 5*72, y: 5*72 };
 
 	var pageMargin = {
 		x: 0.5*72,
@@ -451,7 +464,7 @@ function main() {
 	};
 
 	doc = new PDFDocument(pageOptions);
-	doc.pipe(fs.createWriteStream('pp.pdf'));
+	doc.pipe(fs.createWriteStream(pdfOut));
 	doc.lineWidth(1);
 
 	var ppattern = pdfizePattern(pattern);
