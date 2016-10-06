@@ -106,6 +106,10 @@ function loadFromYaml(path) {
 		part.bbox.right = p.bbox.right;
 		part.bbox.top = p.bbox.top;
 		part.bbox.bottom = p.bbox.bottom;
+
+		if( typeof p.shapes === 'undefined' ) {
+			p.shapes = [];
+		}
 		
 		p.shapes.map( function(s) { 
 			if( s.type == 'line' ) {
