@@ -41,12 +41,6 @@ Part.prototype.size = function() {
 	};
 };
 
-Part.prototype.scaleWithin = function(availWidth, availHeight) {
-	var scaleX = availWidth / this.width();
-	var scaleY = availHeight / this.height();
-	return this.scaleBy(scaleX, scaleY);
-};
-
 // scale the part to fit within a width and height but keeping the aspect
 // ratio
 Part.prototype.scaleWithinProp = function(availWidth, availHeight) {
@@ -61,24 +55,24 @@ Part.prototype.scaleWithinProp = function(availWidth, availHeight) {
 	}
 	
 	return {
-		scaledPart: this.scaleBy(s, s),
+		scaledPart: this.scaleBy(s),
 		scaleFactor: s
 	};
 };
 
 // return a new Part like this one but scaled by the factors sx, sy on the X
 // and Y axes, respectively.
-Part.prototype.scaleBy = function(sx, sy) {
+Part.prototype.scaleBy = function(s) {
 	//console.log('scaleBy '+sx+' '+sy);
 	spart = new Part();
 	spart.title = this.title;
-	spart.bbox.left = this.bbox.left * sx;
-	spart.bbox.right = this.bbox.right * sy;
-	spart.bbox.top = this.bbox.top * sy;
-	spart.bbox.bottom = this.bbox.bottom * sy;
+	spart.bbox.left = this.bbox.left * s;
+	spart.bbox.right = this.bbox.right * s;
+	spart.bbox.top = this.bbox.top * s;
+	spart.bbox.bottom = this.bbox.bottom * s;
 	
 	this.shapes.map( function(shape) {
-		spart.shapes.push( shape.scaleBy(sx, sy) );
+		spart.shapes.push( shape.scaleBy(s) );
 	});
 	return spart;
 };
@@ -91,6 +85,7 @@ function loadFromYaml(path) {
 	var P = require('./geom.js').P;
 	var Line = require('./geom.js').Line;
 	var Bezier = require('./geom.js').Bezier;
+	var Arc = require('./geom.js').Arc;
 	
 	data = yaml.safeLoad(data);
 	//console.log(data);
@@ -123,6 +118,12 @@ function loadFromYaml(path) {
 					P(s.sctl[0], s.sctl[1]),
 					P(s.ectl[0], s.ectl[1]),
 					P(s.end[0], s.end[1])
+				));
+			} else if( s.type == 'arc' ) {
+				part.shapes.push( new Arc(
+					P(s.start[0], s.start[1]),
+					P(s.end[0], s.end[1]),
+					s.radius, s.large, s.clockwise
 				));
 			} else {
 				throw "Unknown shape type in YAML file: "+s.type;

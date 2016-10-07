@@ -25,10 +25,10 @@ Line.prototype.toString = function() {
 	return 'Line '+this.start.x+','+this.start.y+' -> '+this.end.x+','+this.end.y;
 };
 
-Line.prototype.scaleBy = function(sx, sy) {
+Line.prototype.scaleBy = function(s) {
 	return new Line(
-		start = new Point( this.start.x*sx, this.start.y*sy),
-		end = new Point( this.end.x*sx, this.end.y*sy)
+		start = new Point( this.start.x*s, this.start.y*s),
+		end = new Point( this.end.x*s, this.end.y*s)
 	);
 };
 
@@ -69,12 +69,12 @@ Bezier.prototype.toString = function() {
 	);
 }
 
-Bezier.prototype.scaleBy = function(sx, sy) {
+Bezier.prototype.scaleBy = function(s) {
 	return new Bezier(
-		start = new Point( this.start.x*sx, this.start.y*sy ),
-		sctl = new Point( this.sctl.x*sx, this.sctl.y*sy ),
-		ectl = new Point( this.ectl.x*sx, this.ectl.y*sy ),
-		end = new Point( this.end.x*sx, this.end.y*sy )
+		start = new Point( this.start.x*s, this.start.y*s ),
+		sctl = new Point( this.sctl.x*s, this.sctl.y*s ),
+		ectl = new Point( this.ectl.x*s, this.ectl.y*s ),
+		end = new Point( this.end.x*s, this.end.y*s )
 	);
 };
 
@@ -89,7 +89,64 @@ Bezier.prototype.xlate = function(dx, dy) {
 
 /////////////////////////////////////////////////////////////
 
+var Arc = function(start, end, radius, large, clockwise) {
+	if( ! (start instanceof Point) ) {
+		throw new Error('start must be an instance of Point, not '+start);
+	}
+	if( ! (end instanceof Point) ) {
+		throw new Error('end must be an instance of Point, not '+end);
+	}
+	if( typeof(radius) != 'number' ) {
+		throw new Error('radius must be a number, not '+radius);
+	}
+	if( typeof(large) != 'boolean' ) {
+		throw new Error('large must be a boolean, not '+large);
+	}
+	if( typeof(clockwise) != 'boolean' ) {
+		throw new Error('clockwise must be a boolean, not '+clockwise);
+	}
+	this.start = start;
+	this.end = end;
+	this.radius = radius;
+	this.large = large;
+	this.clockwise = clockwise;
+};
+
+Arc.prototype.toString = function() {
+	return (
+		'Arc '+this.start.x+','+this.start.y+
+		' -> '+this.end.x+','+this.end.y+
+		' r='+this.radius+
+		' lrg='+(this.large ? 'T' : 'f')+
+		' cw='+(this.clockwise ? 'T' : 'f')
+	);
+};
+
+Arc.prototype.xlate = function(dx, dy) {
+	return new Arc(
+		start = new Point( this.start.x+dx, this.start.y+dy),
+		end = new Point( this.end.x+dx, this.end.y+dy),
+		radius = this.radius,
+		large = this.large,
+		clockwise = this.clockwise
+	);
+}
+
+Arc.prototype.scaleBy = function(s) {
+	return new Arc(
+		start = new Point( this.start.x*s, this.start.y*s ),
+		end = new Point( this.end.x*s, this.end.y*s ),
+		radius = this.radius * s,
+		large = this.large,
+		clockwise = this.clockwise
+	);
+}
+
+/////////////////////////////////////////////////////////////
+
+
 exports.Point = Point;
 exports.Line = Line;
 exports.Bezier = Bezier;
+exports.Arc = Arc;
 exports.P = P;

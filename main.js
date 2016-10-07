@@ -7,6 +7,7 @@ const testpattern = require('./testpattern.js');
 const Pattern = require('./pattern.js').Pattern;
 const Part = require('./pattern.js').Part;
 const loadFromYaml = require('./pattern.js').loadFromYaml;
+const format = require('string-template');
 
 function drawLine(doc, line) {
 	var s = line.start;
@@ -29,12 +30,29 @@ function drawBezier(doc, bezier) {
 
 };
 
+function drawArc(doc, arc) {
+	var path = format("M {startX},{startY} A{radiusX},{radiusY} {xAxisRotation} {largeArc},{antiClockwise} {endX},{endY}", {
+		startX: arc.start.x, startY: arc.start.y,
+		radiusX: arc.radius, radiusY: arc.radius,
+		endX: arc.end.x, endY: arc.end.y,
+		largeArc: arc.large ? '1' : '0', 
+		antiClockwise: arc.clockwise ? '1' : '0',
+		xAxisRotation: 0
+	});
+	console.log('ARC: '+path);
+	
+	doc.path(path);
+	doc.stroke();
+};
+
 function drawShape(doc, shape) {
 	//console.log('drawShape: '+shape.toString());
 	if( shape instanceof geom.Bezier ) {
 		drawBezier(doc, shape );
 	} else if ( shape instanceof geom.Line ) {
 		drawLine(doc, shape);
+	} else if( shape instanceof geom.Arc ) {
+		drawArc(doc, shape);
 	} else {
 		throw new Error('shape is an unknown type of object: '+shape);
 	}
@@ -73,6 +91,14 @@ function makexformShape(unit) {
 				xformPoint(shape.sctl),
 				xformPoint(shape.ectl),
 				xformPoint(shape.end)
+			);
+		} else if( shape instanceof geom.Arc ) {
+			return new geom.Arc(
+				xformPoint(shape.start),
+				xformPoint(shape.end),
+				shape.radius * M,
+				shape.large,
+				shape.clockwise
 			);
 		} else {
 			throw new Error('dont know how to transform '+shape);
