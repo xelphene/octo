@@ -262,7 +262,7 @@ function renderPartScaled(pattern, part, pdfdoc, pageSize, pageMargin, gridSpaci
 	// the "space" option to dash() doesn't seem to do anything... PDFKit problem?
 	pdfdoc.dash(length=2, space=10);
 	pdfdoc.strokeOpacity(0.2);
-	var gridEndX = startX + scaled.scaledPart.height();
+	var gridEndX = startX + scaled.scaledPart.width();
 	for( var x = startX; x<=gridEndX; x+=gridSpacing ) {
 		console.log('vertical grid line at '+x);
 		pdfdoc.moveTo( x, startY );
@@ -270,7 +270,7 @@ function renderPartScaled(pattern, part, pdfdoc, pageSize, pageMargin, gridSpaci
 		pdfdoc.stroke();
 	}
 	// draw the horizontal grid lines
-	var gridEndY = startY + scaled.scaledPart.width();
+	var gridEndY = startY + scaled.scaledPart.height();
 	for( var y = startY; y<=gridEndY; y+=gridSpacing ) {
 		pdfdoc.moveTo( startX, y );
 		pdfdoc.lineTo( startX+scaled.scaledPart.width(), y );
