@@ -39,7 +39,6 @@ function drawArc(doc, arc) {
 		antiClockwise: arc.clockwise ? '1' : '0',
 		xAxisRotation: 0
 	});
-	console.log('ARC: '+path);
 	
 	doc.path(path);
 	doc.stroke();
