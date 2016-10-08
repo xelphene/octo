@@ -1,5 +1,7 @@
 multi-part per pattern 
 remove "make" from start of closure functions
+raise error when bbox is {} in yaml
+say which part this is on every page
 
 --- below = done ---
 
