@@ -1,7 +1,7 @@
 multi-part per pattern 
 remove "make" from start of closure functions
-raise error when bbox is {} in yaml
-say which part this is on every page
+say which part this is on every page: add part abbreviations
+make margin lines extend completely across page
 
 --- below = done ---
 
@@ -11,3 +11,4 @@ add joint indicators to lifesize poarts
 BUG: preview is too tall (see testpattern with pagesize 5x5)
 turn makexlateShape / makexlatePoint into methods on geom objects
 bezier curve support
+raise error when bbox is {} in yaml

@@ -93,10 +93,22 @@ function loadFromYaml(path) {
 	var pat = new Pattern();
 	pat.unit = data.unit;
 	pat.title = data.title;
-	data.parts.map( function (p) {
+	data.parts.forEach( function (p, part_index) {
 		//console.log(p);
 		var part = new Part();
+		
+		if( typeof p.title === "undefined" ) {
+			throw "Part "+(part_index+1)+" has no title";
+		}
+		
 		part.title = p.title;
+
+		["left","right","top","bottom"].map( function(side) {
+			if( typeof p.bbox[side] === 'undefined' ) {
+				throw "Bounding box "+side+" is undefined in part "+part.title;
+			}
+		});
+
 		part.bbox.left = p.bbox.left;
 		part.bbox.right = p.bbox.right;
 		part.bbox.top = p.bbox.top;
