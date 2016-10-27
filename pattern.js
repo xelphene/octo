@@ -7,6 +7,26 @@ var Pattern = function () {
 	this.title = null;
 };
 
+Pattern.prototype.log = function(f) {
+	if( ! f ) {
+		f = console.log;
+	}
+	f('Pattern title: '+p.title);
+	f('Pattern units: '+p.unit);
+	p.parts.forEach( function(part, index) {
+		f('Part '+(index+1)+' / '+p.parts.length+': '+part.title);
+		f('  Bounding Box:');
+		f('    top : '+part.bbox.top);
+		f('    bot : '+part.bbox.bottom);
+		f('    left: '+part.bbox.left);
+		f('    rght: '+part.bbox.right);
+		f('  Shapes:');
+		part.shapes.forEach( function(shape,sindex) {
+			f('    '+sindex+': '+shape);
+		});
+	});
+};
+
 var Part = function() {
 	this.shapes = [];
 	this.bbox = new Object();
