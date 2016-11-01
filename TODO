@@ -1,3 +1,8 @@
+less miserable shape constructor code.
+	new geom.Bezier({
+		start: P(1,0), sctl: P(2,3),
+		end:   P(2,3), ectl: P(4,5)
+	});
 multi-part per pattern 
 remove "make" from start of closure functions
 say which part this is on every page: add part abbreviations
