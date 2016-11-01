@@ -460,6 +460,39 @@ function logPart(part, f) {
 	});
 };
 
+function genpdf(pattern, outfn) {
+	var pageSize = { x: 8.5*72, y: 11*72 };
+	//var pageSize = { x: 5*72, y: 5*72 };
+
+	var pageMargin = {
+		x: 0.5*72,
+		y: 0.5*72
+	};
+
+	var pageOptions = {
+		size: [pageSize.x, pageSize.y],
+		margin: 0
+	};
+
+	doc = new PDFDocument(pageOptions);
+	doc.pipe(fs.createWriteStream(outfn));
+	doc.lineWidth(1);
+
+	var ppattern = pdfizePattern(pattern);
+
+	// the grid lines in the preview page will be every 1 pattern unit (i.e.
+	//every inch, every cm...)
+	previewGridSpacing = makept(pattern.unit)(1);
+	renderPartScaled(ppattern, ppattern.parts[0], doc, pageSize, pageMargin, previewGridSpacing, origUnit=pattern.unit);
+
+	doc.addPage();
+
+	renderPartPaged(ppattern, ppattern.parts[0], doc, pageSize, pageMargin);
+
+	doc.end();
+};
+
+
 function main() {
 
 	if( process.argv.length != 4 ) {
@@ -510,4 +543,5 @@ function main() {
 
 main();
 
+exports.genpdf = genpdf;
 
