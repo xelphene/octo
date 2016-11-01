@@ -264,7 +264,6 @@ function renderPartScaled(pattern, part, pdfdoc, pageSize, pageMargin, gridSpaci
 	pdfdoc.strokeOpacity(0.2);
 	var gridEndX = startX + scaled.scaledPart.width();
 	for( var x = startX; x<=gridEndX; x+=gridSpacing ) {
-		console.log('vertical grid line at '+x);
 		pdfdoc.moveTo( x, startY );
 		pdfdoc.lineTo( x, startY+scaled.scaledPart.height() );
 		pdfdoc.stroke();
