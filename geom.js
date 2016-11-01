@@ -41,6 +41,13 @@ Line.prototype.xlate = function(dx, dy) {
 
 /////////////////////////////////////////////////////////////
 
+function bezier(params) {
+	return new Bezier(
+		params.start, params.sctl,
+		params.ectl, params.end
+	);
+};
+
 var Bezier = function(start, sctl, ectl, end) {
 	if( ! (start instanceof Point) ) {
 		throw new Error('start must be an instance of Point, not '+start);
@@ -150,3 +157,4 @@ exports.Line = Line;
 exports.Bezier = Bezier;
 exports.Arc = Arc;
 exports.P = P;
+exports.bezier = bezier;
