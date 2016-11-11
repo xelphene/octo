@@ -10,7 +10,7 @@ function P(x,y) {
 
 ////////////////////////////////////////////////////////////////
 
-var Line = function(start, end) {
+var Line = function(start, end, comment) {
 	if( ! (start instanceof Point) ) {
 		throw new Error('start must be an instance of Point, not '+start);
 	}
@@ -19,10 +19,20 @@ var Line = function(start, end) {
 	}
 	this.start = start;
 	this.end = end;
+	this.comment = comment;
+};
+
+Line.prototype.slope = function() {
+	// y = mx+b
+	return (this.end.y - this.start.y) / (this.end.x - this.start.x);
 };
 
 Line.prototype.toString = function() {
 	return 'Line '+this.start.x+','+this.start.y+' -> '+this.end.x+','+this.end.y;
+};
+
+Line.prototype.isVertical = function() {
+	return this.start.x==this.end.x;
 };
 
 Line.prototype.scaleBy = function(s) {
@@ -37,6 +47,17 @@ Line.prototype.xlate = function(dx, dy) {
 		start = P( this.start.x+dx, this.start.y+dy ),
 		end = P( this.end.x+dx, this.end.y+dy )
 	);
+};
+
+Line.prototype.ymirror = function() {
+	return new Line(
+		P( -this.start.x, this.start.y),
+		P( -this.end.x,   this.end.y)
+	);
+};
+
+Line.prototype.yint = function() {
+	return this.slope() * (0-this.start.x) + this.start.y;
 };
 
 /////////////////////////////////////////////////////////////
@@ -65,6 +86,13 @@ var Bezier = function(start, sctl, ectl, end) {
 	this.sctl = sctl;
 	this.ectl = ectl;
 	this.end = end;
+};
+
+Bezier.prototype.ymirror = function() {
+	return bezier({
+		start: P( -this.start.x, this.start.y),		sctl: P( -this.sctl.x, this.sctl.y ),
+		end:   P( -this.end.x,   this.end.y), 		ectl: P( -this.ectl.x, this.ectl.y )
+	})
 };
 
 Bezier.prototype.toString = function() {

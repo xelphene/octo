@@ -22,7 +22,11 @@ Pattern.prototype.log = function(f) {
 		f('    rght: '+part.bbox.right);
 		f('  Shapes:');
 		part.shapes.forEach( function(shape,sindex) {
-			f('    '+sindex+': '+shape);
+			if( shape.comment ) {
+				f('    '+sindex+': '+shape+' ('+shape.comment+')');
+			} else {
+				f('    '+sindex+': '+shape);
+			}
 		});
 	});
 };
