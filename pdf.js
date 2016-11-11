@@ -482,11 +482,15 @@ function genpdf(pattern, outfn) {
 	// the grid lines in the preview page will be every 1 pattern unit (i.e.
 	//every inch, every cm...)
 	previewGridSpacing = makept(pattern.unit)(1);
-	renderPartScaled(ppattern, ppattern.parts[0], doc, pageSize, pageMargin, previewGridSpacing, origUnit=pattern.unit);
 
-	doc.addPage();
-
-	renderPartPaged(ppattern, ppattern.parts[0], doc, pageSize, pageMargin);
+	ppattern.parts.forEach( function(ppart, index) {
+		renderPartScaled(ppattern, ppart, doc, pageSize, pageMargin, previewGridSpacing, origUnit=pattern.unit);
+		doc.addPage();
+		renderPartPaged(ppattern, ppart, doc, pageSize, pageMargin);
+		if( index < ppattern.parts.length-1 ) {
+			doc.addPage();
+		}
+	});
 
 	doc.end();
 };

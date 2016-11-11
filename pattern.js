@@ -11,10 +11,15 @@ Pattern.prototype.log = function(f) {
 	if( ! f ) {
 		f = console.log;
 	}
-	f('Pattern title: '+p.title);
-	f('Pattern units: '+p.unit);
-	p.parts.forEach( function(part, index) {
-		f('Part '+(index+1)+' / '+p.parts.length+': '+part.title);
+	f('Pattern title: '+this.title);
+	f('Pattern units: '+this.unit);
+	f('asdf '+this.parts.length);
+	var pattern = this;
+	this.parts.forEach( function(part, index) {
+		// "this" in here refers to something different than 'this' just
+		// outside of here.  I don't understand why.  hence the 'var pattern
+		// = this' assignment above.
+		f('Part '+(index+1)+' / '+pattern.parts.length+': '+part.title);
 		f('  Bounding Box:');
 		f('    top : '+part.bbox.top);
 		f('    bot : '+part.bbox.bottom);
