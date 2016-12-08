@@ -47,7 +47,7 @@ var Part = function() {
 };
 
 Part.prototype.addShape = function(shape) {
-	isShape = (shape instanceof geom.Bezier) || (shape instanceof geom.Line);
+	isShape = (shape instanceof geom.Bezier) || (shape instanceof geom.Line) || (shape instanceof geom.Arc);
 	if( ! isShape ) {
 		throw new Error('shape required for SubPattern.addShape(), not '+shape);
 	}

@@ -1,9 +1,10 @@
+if the bounding box is a decimal (i.e. left: -10.5) the grid lines will be
+	every 0.5th.
 less miserable shape constructor code.
 	new geom.Bezier({
 		start: P(1,0), sctl: P(2,3),
 		end:   P(2,3), ectl: P(4,5)
 	});
-multi-part per pattern 
 remove "make" from start of closure functions
 say which part this is on every page: add part abbreviations
 make margin lines extend completely across page
@@ -12,6 +13,7 @@ part.addShape*S*()
 
 --- below = done ---
 
+multi-part per pattern 
 add part/pattern titles to preview page
 add grid lines to preview
 add joint indicators to lifesize poarts
