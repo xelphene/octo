@@ -211,6 +211,12 @@ function renderPartPaged(pattern, part, pdfdoc, pageSize, pageMargin) {
 		pdfdoc.text(page.right, pageSize.x - pageMargin.x - fontSize - extraSpace, pageSize.y/2);
 		//pdfdoc.text(page.bot, pageSize.x/2, pageSize.y-pageMargin.y);
 
+		// draw part name watermark
+		pdfdoc.strokeOpacity(0.2);
+		pdfdoc.fillOpacity(0.2);
+		pdfdoc.fontSize(24);
+		pdfdoc.text(part.title, pageSize.x/2, pageSize.y/2, width=72*8, align='justify', height=10);
+
 		// if another page comes after this one, add a new page to the doc
 		if( index < (pages.length-1) ) {
 			//console.log('adding a new page to the doc');
