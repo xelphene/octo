@@ -147,6 +147,16 @@ var Arc = function(start, end, radius, large, clockwise) {
 	this.clockwise = clockwise;
 };
 
+Arc.prototype.ymirror = function() {
+	return new Arc(
+		P(-this.start.x, this.start.y),
+		P(-this.end.x, this.end.y),
+		this.radius,
+		this.large,
+		! this.clockwise
+	);
+};
+
 Arc.prototype.toString = function() {
 	return (
 		'Arc '+this.start.x+','+this.start.y+

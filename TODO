@@ -10,6 +10,7 @@ say which part this is on every page: add part abbreviations
 make margin lines extend completely across page
 detect when parts are outside bbox
 part.addShape*S*()
+in the preview make the origin lines thicker
 
 --- below = done ---
 
