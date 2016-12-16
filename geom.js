@@ -4,6 +4,10 @@ var Point = function(x,y) {
 	this.y = y;
 };
 
+Point.prototype.toString = function() {
+	return 'Point('+this.x+','+this.y+')';
+};
+
 function P(x,y) {
 	return new Point(x,y);
 };
