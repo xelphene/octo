@@ -26,6 +26,12 @@ var Line = function(start, end, comment) {
 	this.comment = comment;
 };
 
+Line.prototype.len = function() {
+	a = Math.abs(this.start.x - this.end.x);
+	b = Math.abs(this.start.y - this.end.y);
+	return Math.sqrt( Math.pow(a,2) + Math.pow(b,2) );
+};
+
 Line.prototype.slope = function() {
 	// y = mx+b
 	return (this.end.y - this.start.y) / (this.end.x - this.start.x);
