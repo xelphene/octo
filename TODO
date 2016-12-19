@@ -1,3 +1,6 @@
+add a method to each shape to return a new point on a line perpendicular to
+	the line at the start/end point at a specified distance in x+/x-
+	direction (dont work when vertical)
 if the bounding box is a decimal (i.e. left: -10.5) the grid lines will be
 	every 0.5th.
 less miserable shape constructor code.
