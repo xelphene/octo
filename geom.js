@@ -8,6 +8,17 @@ Point.prototype.toString = function() {
 	return 'Point('+this.x+','+this.y+')';
 };
 
+Point.prototype.offset = function(a, d) {
+
+	/* return a point that is distance d from this point at the given angle
+	 * a. 90 = straight up. 0 = right */
+
+	var h = d * sin(a);
+	var w = d * cos(a);
+	return P( this.x+w, this.y+h );
+};
+
+
 function P(x,y) {
 	return new Point(x,y);
 };
@@ -68,6 +79,57 @@ Line.prototype.ymirror = function() {
 
 Line.prototype.yint = function() {
 	return this.slope() * (0-this.start.x) + this.start.y;
+};
+
+Line.prototype.xangle = function() {
+	// return angle in degrees of this line with respect to x axis
+	h = Math.abs(this.start.y - this.end.y);
+	w = Math.abs(this.start.x - this.end.x);
+	a = Math.atan(h/w);
+	if( this.slope() < 0 ) {
+		return -radiansToDegrees(a);
+	} else{
+		return radiansToDegrees(a);
+	}
+};
+
+// TODO: probably deletable
+Line.prototype.offsetPoint = function(p, d) {
+	/* given a point p on this line (not verified), return a new point which
+	is distance d along the perpendicular line at this point */
+	var a = this.xangle();
+	a -= 90; // perpendicular
+	var h = d * sin(a);
+	var w = d * cos(a);
+	return P( p.x+w, p.y+h );
+};
+
+Line.prototype.startOffsetPoint = function(d) {
+	return this.start.offset(this.xangle()-90, d);
+};
+
+Line.prototype.endOffsetPoint = function(d) {
+	return this.end.offset(this.xangle()-90, d);
+};
+
+/*
+Line.prototype.offsetLine = function(d) {
+	return new Line(
+		this.startOffsetPoint(d),
+		this.endOffsetPoint(d)
+	);
+};
+*/
+
+Line.prototype.xlateAngular = function(a, d) {
+	return new Line(
+		this.start.offset(a, d),
+		this.end.offset(a, d)
+	);
+};
+
+Line.prototype.offsetLine = function(d) { 
+	return this.xlateAngular(this.xangle()-90, d);
 };
 
 /////////////////////////////////////////////////////////////
@@ -196,6 +258,33 @@ Arc.prototype.scaleBy = function(s) {
 		clockwise = this.clockwise
 	);
 }
+
+function degreesToRadians(d) {
+	return (d*Math.PI) / 180;
+}
+
+function radiansToDegrees(r) {
+	return r * (180/Math.PI);
+}
+
+function sin(d) {
+	return Math.sin(
+		degreesToRadians(d)
+	)
+}
+
+function cos(d) {
+	return Math.cos(
+		degreesToRadians(d)
+	)
+}
+
+function tan(d) {
+	return Math.tan(
+		degreesToRadians(d)
+	)
+}
+
 
 /////////////////////////////////////////////////////////////
 
