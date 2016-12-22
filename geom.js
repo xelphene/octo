@@ -132,6 +132,38 @@ Line.prototype.offsetLine = function(d) {
 	return this.xlateAngular(this.xangle()-90, d);
 };
 
+Line.prototype.getRightExtent = function() {
+	if( this.start.x > this.end.x ) {
+		return this.start.x;
+	} else {
+		return this.end.x;
+	}
+};
+
+Line.prototype.getLeftExtent = function() {
+	if( this.start.x < this.end.x ) {
+		return this.start.x;
+	} else {
+		return this.end.x;
+	}
+};
+
+Line.prototype.getTopExtent = function() {
+	if( this.start.y > this.end.y ) {
+		return this.start.y;
+	} else {
+		return this.end.y;
+	}
+};
+
+Line.prototype.getBottomExtent = function() {
+	if( this.start.y < this.end.y ) {
+		return this.start.y;
+	} else {
+		return this.end.y;
+	}
+};
+
 /////////////////////////////////////////////////////////////
 
 function bezier(params) {

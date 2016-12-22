@@ -2,6 +2,7 @@ add a PDF example
 add a method to each shape to return a new point on a line perpendicular to
 	the line at the start/end point at a specified distance in x+/x-
 	direction (dont work when vertical)
+	* DONE for Line
 if the bounding box is a decimal (i.e. left: -10.5) the grid lines will be
 	every 0.5th.
 less miserable shape constructor code.
@@ -13,6 +14,7 @@ less miserable shape constructor code.
 	new geom.Line([0,0], [1,5]);
 auto bounding box
 	Shape.getLeftExtent(), getTopExtent(), ...
+	* DONE for Line
 give Pattern.unit and Part.title 'Unnamed' defaults
 remove "make" from start of closure functions
 say which part this is on every page: add part abbreviations
