@@ -2,9 +2,9 @@
 const geom = require('./geom.js');
 
 var Pattern = function () {
-	this.unit = null;
+	this.unit = 'inch';
 	this.parts = [];
-	this.title = null;
+	this.title = 'Untitled Pattern';
 };
 
 Pattern.prototype.log = function(f) {
@@ -43,7 +43,7 @@ var Part = function() {
 	this.bbox.right = null;
 	this.bbox.top = null;
 	this.bbox.bottom = null;
-	this.title = null;
+	this.title = 'Untitled Part';
 };
 
 Part.prototype.addShape = function(shape) {
