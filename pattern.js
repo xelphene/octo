@@ -46,54 +46,30 @@ var Part = function() {
 	this.title = 'Untitled Part';
 };
 
-Part.prototype.getLeftExtent = function() {
-	var min=null;
-	this.shapes.map( function(shape) {
-		if( min==null || shape.getLeftExtent() < min ) {
-			min = shape.getLeftExtent();
-		}
-	});
-	return min;
-};
-
-Part.prototype.getBottomExtent = function() {
-	var min=null;
-	this.shapes.map( function(shape) {
-		if( min==null || shape.getBottomExtent() < min ) {
-			min = shape.getBottomExtent();
-		}
-	});
-	return min;
-};
-
-Part.prototype.getRightExtent = function() {
+Part.prototype.getExtent = function(axis,direction) {
 	var max=null;
 	this.shapes.map( function(shape) {
-		if( max==null || shape.getRightExtent() > max ) {
-			max = shape.getRightExtent();
+		if( max==null || shape.getExtent(axis,direction)*direction > max*direction ) {
+			max = shape.getExtent(axis,direction);
 		}
 	});
 	return max;
 };
 
-Part.prototype.getTopExtent = function() {
-	var max=null;
-	this.shapes.map( function(shape) {
-		if( max==null || shape.getTopExtent() > max ) {
-			max = shape.getTopExtent();
-		}
-	});
-	return max;
-};
-
-Part.prototype.setAutoBBox = function(padding) {
+Part.prototype.getAutoBBox = function(padding) {
+	var bbox = {};
 	if( padding==null ) {
 		padding=0;
 	}
-	this.bbox.left = this.getLeftExtent()-padding;
-	this.bbox.right = this.getRightExtent()+padding;
-	this.bbox.bottom = this.getBottomExtent()-padding;
-	this.bbox.top = this.getTopExtent()+padding;
+	bbox.left = this.getExtent('x',-1)-padding;
+	bbox.right = this.getExtent('x',1)+padding;
+	bbox.bottom = this.getExtent('y',-1)-padding;
+	bbox.top = this.getExtent('y',1)+padding;
+	return bbox;
+};
+
+Part.prototype.setAutoBBox = function(padding) {
+	this.bbox = this.getAutoBBox(padding);
 };
 
 Part.prototype.addShape = function(shape) {

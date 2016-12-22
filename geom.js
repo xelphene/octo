@@ -25,6 +25,27 @@ function P(x,y) {
 
 ////////////////////////////////////////////////////////////////
 
+var Shape = function() {
+};
+
+Shape.prototype.getExtent = function(axis, direction) {
+	var max=null;
+	var theShape = this;
+	this.getPointNames().map( function(point) {
+		/*
+		console.log('point = '+point);
+		console.log(theShape[point]);
+		console.log(theShape[point][axis]);
+		*/
+		if( max==null || theShape[point][axis]*direction > max ) {
+			max = theShape[point][axis]
+		}
+	});
+	return max;
+};
+
+////////////////////////////////////////////////////////////////
+
 var Line = function(start, end, comment) {
 	if( ! (start instanceof Point) ) {
 		throw new Error('start must be an instance of Point, not '+start);
@@ -35,6 +56,12 @@ var Line = function(start, end, comment) {
 	this.start = start;
 	this.end = end;
 	this.comment = comment;
+};
+
+Line.prototype = Object.create(Shape.prototype);
+
+Line.prototype.getPointNames = function() {
+	return ['start','end'];
 };
 
 Line.prototype.len = function() {
@@ -112,15 +139,6 @@ Line.prototype.endOffsetPoint = function(d) {
 	return this.end.offset(this.xangle()-90, d);
 };
 
-/*
-Line.prototype.offsetLine = function(d) {
-	return new Line(
-		this.startOffsetPoint(d),
-		this.endOffsetPoint(d)
-	);
-};
-*/
-
 Line.prototype.xlateAngular = function(a, d) {
 	return new Line(
 		this.start.offset(a, d),
@@ -132,37 +150,6 @@ Line.prototype.offsetLine = function(d) {
 	return this.xlateAngular(this.xangle()-90, d);
 };
 
-Line.prototype.getRightExtent = function() {
-	if( this.start.x > this.end.x ) {
-		return this.start.x;
-	} else {
-		return this.end.x;
-	}
-};
-
-Line.prototype.getLeftExtent = function() {
-	if( this.start.x < this.end.x ) {
-		return this.start.x;
-	} else {
-		return this.end.x;
-	}
-};
-
-Line.prototype.getTopExtent = function() {
-	if( this.start.y > this.end.y ) {
-		return this.start.y;
-	} else {
-		return this.end.y;
-	}
-};
-
-Line.prototype.getBottomExtent = function() {
-	if( this.start.y < this.end.y ) {
-		return this.start.y;
-	} else {
-		return this.end.y;
-	}
-};
 
 /////////////////////////////////////////////////////////////
 
@@ -190,6 +177,12 @@ var Bezier = function(start, sctl, ectl, end) {
 	this.sctl = sctl;
 	this.ectl = ectl;
 	this.end = end;
+};
+
+Bezier.prototype = Object.create(Shape.prototype);
+
+Bezier.prototype.getPointNames = function () {
+	return ['start','sctl','ectl','end'];
 };
 
 Bezier.prototype.ymirror = function() {
@@ -250,6 +243,13 @@ var Arc = function(start, end, radius, large, clockwise) {
 	this.large = large;
 	this.clockwise = clockwise;
 };
+
+Arc.prototype.getPointNames = function() {
+	return ['start','end'];
+};
+
+// TODO: inherited getExtent is NOT correct. must take radius into account
+// usually
 
 Arc.prototype.ymirror = function() {
 	return new Arc(
