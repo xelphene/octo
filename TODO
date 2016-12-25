@@ -1,3 +1,5 @@
+replace direct access to bbox with get/set methods to detect errors (would
+	have saved some headaches before)
 add a PDF example
 add a method to each shape to return a new point on a line perpendicular to
 	the line at the start/end point at a specified distance in x+/x-
