@@ -151,16 +151,17 @@ function drawPageMargins(pdfdoc, pageSize, pageMargin) {
 // render one Part from a Pattern into a PDF file of multiple pages, as many
 // pages needed to fit the part.
 function renderPartPaged(pattern, part, pdfdoc, pageSize, pageMargin) {
-	console.log(' -------- begin renderPartPaged --------');
 	
 	var windowSize = {
 		x: pageSize.x - pageMargin.x*2,
 		y: pageSize.y - pageMargin.y*2
 	};
 	
+	/*
 	console.log('pageSize.x: '+pageSize.x+'  pageSize.y: '+pageSize.y);
 	console.log('pageMargin.x: '+pageMargin.x+'  pageMargin.y: '+pageMargin.y);
 	console.log('windowSize.x: '+windowSize.x+'  windowSize.y: '+windowSize.y);
+	*/
 	var pages = paginate(part.size(), windowSize);
 	
 	pages.forEach( function(page, index) {
@@ -386,9 +387,11 @@ function coordXform(pattern, part) {
 	
 	var xformShape = makexformShape(pattern.unit);
 	var shapes = part.shapes.map(xformShape);
+	/*
 	console.log('--- transformed shapes ---');
 	shapes.map(function (s) { console.log('    '+s.toString()) } );
 	console.log('---');
+	*/
 
 	// always move everything down by the top's distance above the y-axis
 	var xly = pt(part.bbox.top);
@@ -400,9 +403,12 @@ function coordXform(pattern, part) {
 	});
 	
 	//shapes = shapes.map( function(s) { return xlateShape(shape, xlx, xly) } );
+
+	/*
 	console.log('--- translated + transformed shapes ---');
 	shapes.map(function (s) { console.log('    '+s.toString()) } );
 	console.log('---');
+	*/
 
 	return shapes;
 };
