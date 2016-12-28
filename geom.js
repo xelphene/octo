@@ -1,14 +1,25 @@
 
+function roundTo( value, precision ) {
+	var m = Math.pow(10,precision);
+	return Math.round(value*m)/m;
+}
+
+/////////////////////////////////////////////////////
+
 var Point = function(x,y) {
 	this.x = x;
 	this.y = y;
 };
 
 Point.prototype.toString = function() {
-	return 'Point('+this.x+','+this.y+')';
+	return 'Point(' + roundTo(this.x,3) + ',' + roundTo(this.y,3) + ')';
 };
 
-Point.prototype.offset = function(a, d) {
+Point.prototype.toStringShort = function() {
+	return roundTo(this.x,3) + ',' + roundTo(this.y,3);
+};
+
+Point.prototype.xlateAngular = function(a, d) {
 
 	/* return a point that is distance d from this point at the given angle
 	 * a. 90 = straight up. 0 = right */
@@ -17,7 +28,6 @@ Point.prototype.offset = function(a, d) {
 	var w = d * cos(a);
 	return P( this.x+w, this.y+h );
 };
-
 
 function P(x,y) {
 	return new Point(x,y);
@@ -29,19 +39,24 @@ var Shape = function() {
 };
 
 Shape.prototype.getExtent = function(axis, direction) {
+	//console.log('BEGIN getExtent');
 	var max=null;
 	var theShape = this;
 	this.getPointNames().map( function(point) {
-		/*
+		/*	
 		console.log('point = '+point);
 		console.log(theShape[point]);
 		console.log(theShape[point][axis]);
+		console.log(theShape[point][axis]*direction);
 		*/
+		
 		if( max==null || theShape[point][axis]*direction > max ) {
-			max = theShape[point][axis]
+			//console.log('its the max. max='+max+'  theShape[point][axis]='+theShape[point][axis]);
+			max = theShape[point][axis]*direction;
 		}
 	});
-	return max;
+	//console.log('END Shape.getExtent');
+	return max*direction;
 };
 
 ////////////////////////////////////////////////////////////////
@@ -76,7 +91,8 @@ Line.prototype.slope = function() {
 };
 
 Line.prototype.toString = function() {
-	return 'Line '+this.start.x+','+this.start.y+' -> '+this.end.x+','+this.end.y;
+	//return 'Line '+this.start.x+','+this.start.y+' -> '+this.end.x+','+this.end.y;
+	return 'Line '+this.start.toStringShort()+' -> '+this.end.toStringShort();
 };
 
 Line.prototype.isVertical = function() {
@@ -91,6 +107,8 @@ Line.prototype.scaleBy = function(s) {
 };
 
 Line.prototype.xlate = function(dx, dy) {
+	// return a new line identical this one by shifted by dx along the X
+	// axis and dy along the Y axis.
 	return new Line(
 		start = P( this.start.x+dx, this.start.y+dy ),
 		end = P( this.end.x+dx, this.end.y+dy )
@@ -98,6 +116,7 @@ Line.prototype.xlate = function(dx, dy) {
 };
 
 Line.prototype.ymirror = function() {
+	// return a new line identical to this one but mirrored about the Y axis
 	return new Line(
 		P( -this.start.x, this.start.y),
 		P( -this.end.x,   this.end.y)
@@ -105,6 +124,7 @@ Line.prototype.ymirror = function() {
 };
 
 Line.prototype.yint = function() {
+	// return the y-intercept of this line
 	return this.slope() * (0-this.start.x) + this.start.y;
 };
 
@@ -120,36 +140,35 @@ Line.prototype.xangle = function() {
 	}
 };
 
-// TODO: probably deletable
-Line.prototype.offsetPoint = function(p, d) {
-	/* given a point p on this line (not verified), return a new point which
-	is distance d along the perpendicular line at this point */
-	var a = this.xangle();
-	a -= 90; // perpendicular
-	var h = d * sin(a);
-	var w = d * cos(a);
-	return P( p.x+w, p.y+h );
-};
-
-Line.prototype.startOffsetPoint = function(d) {
-	return this.start.offset(this.xangle()-90, d);
-};
-
-Line.prototype.endOffsetPoint = function(d) {
-	return this.end.offset(this.xangle()-90, d);
-};
-
 Line.prototype.xlateAngular = function(a, d) {
+	/* return a line similar to this one but is shifted by distance d in
+	 * direction a.  a is an angle in degrees measured with respect to the X
+	 * axis.  a=90 is straight up.  a=0 is to the right.  a and d may be
+	 * negative.
+	 */
+	
 	return new Line(
-		this.start.offset(a, d),
-		this.end.offset(a, d)
+		this.start.xlateAngular(a, d),
+		this.end.xlateAngular(a, d)
 	);
 };
 
-Line.prototype.offsetLine = function(d) { 
-	return this.xlateAngular(this.xangle()-90, d);
+Line.prototype.parallelLine = function(d) { 
+	/*
+	 * return a new Line parallel AND distance d from this one.
+	 *
+	 * for ascending lines (those where start.y > end.y), a positive value
+	 * for d will return a line to the right (X+) of this line.
+	 *
+	 * for descending lines (those where start.y < end.y), a positive value
+	 * for d will return a line to the left (X-) of this line.
+	 * 
+	 * for horizontal lines (start.y==end.y), a positive value for d will
+	 * return a line below (Y-) of this line.
+	 */
+	
+	return this.xlateAngular(this.xangle()+90, d);
 };
-
 
 /////////////////////////////////////////////////////////////
 
@@ -216,6 +235,21 @@ Bezier.prototype.xlate = function(dx, dy) {
 		sctl = P( this.sctl.x+dx, this.sctl.y+dy ),
 		ectl = P( this.ectl.x+dx, this.ectl.y+dy ),
 		end =  P( this.end.x+dx, this.end.y+dy )
+	);
+};
+
+Bezier.prototype.xlateAngular = function(a, d) {
+	/* return a Bezier similar to this one but is shifted by distance d in
+	 * direction a.  a is an angle in degrees measured with respect to the X
+	 * axis.  a=90 is straight up.  a=0 is to the right.  a and d may be
+	 * negative.
+	 */
+	
+	return new Bezier(
+		this.start.xlateAngular(a, d),
+		this.sctl.xlateAngular(a, d),
+		this.ectl.xlateAngular(a, d),
+		this.end.xlateAngular(a, d)
 	);
 };
 
