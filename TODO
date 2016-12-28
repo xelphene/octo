@@ -1,10 +1,5 @@
 replace direct access to bbox with get/set methods to detect errors (would
 	have saved some headaches before)
-add a PDF example
-add a method to each shape to return a new point on a line perpendicular to
-	the line at the start/end point at a specified distance in x+/x-
-	direction (dont work when vertical)
-	* DONE for Line
 if the bounding box is a decimal (i.e. left: -10.5) the grid lines will be
 	every 0.5th.
 less miserable shape constructor code.
@@ -14,10 +9,6 @@ less miserable shape constructor code.
 	});
 	^ more flexible in general. detect params: -- see 'arguments' object
 	new geom.Line([0,0], [1,5]);
-auto bounding box
-	Shape.getLeftExtent(), getTopExtent(), ...
-	* DONE for Line
-give Pattern.unit and Part.title 'Unnamed' defaults
 remove "make" from start of closure functions
 say which part this is on every page: add part abbreviations
 make margin lines extend completely across page
@@ -27,6 +18,8 @@ in the preview make the origin lines thicker
 
 --- below = done ---
 
+add a PDF example
+give Pattern.unit and Part.title 'Unnamed' defaults
 multi-part per pattern 
 add part/pattern titles to preview page
 add grid lines to preview
@@ -35,3 +28,10 @@ BUG: preview is too tall (see testpattern with pagesize 5x5)
 turn makexlateShape / makexlatePoint into methods on geom objects
 bezier curve support
 raise error when bbox is {} in yaml
+add a method to each shape to return a new point on a line perpendicular to
+	the line at the start/end point at a specified distance in x+/x-
+	direction (dont work when vertical)
+	* DONE for all (xlateAngular). Line also has parallelLine convenience method
+auto bounding box
+	Shape.getLeftExtent(), getTopExtent(), ...
+	* DONE for all

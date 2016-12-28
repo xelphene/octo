@@ -61,16 +61,62 @@ Shape.prototype.getExtent = function(axis, direction) {
 
 ////////////////////////////////////////////////////////////////
 
-var Line = function(start, end, comment) {
-	if( ! (start instanceof Point) ) {
-		throw new Error('start must be an instance of Point, not '+start);
+var Line = function() {
+
+	if( arguments.length==2 )
+	{
+		var start = arguments[0];
+		var end = arguments[1];
+		
+		if( ! (start instanceof Point) ) {
+			throw new Error('start must be an instance of Point, not '+start);
+		}
+		if( ! (end instanceof Point) ) {
+			throw new Error('end must be an instance of Point, not '+end);
+		}
+		this.start = start;
+		this.end = end;
+	} else if( arguments.length==1 ) {
+		/* constructor call with a single object containing parameters */
+		
+		var a = validateLineArg(arguments[0]);
+		
+		this.start = a.start;
+		this.end = a.end;
+	} else {
+		throw new Error('Line() called with incorrect number of arguments');
 	}
-	if( ! (end instanceof Point) ) {
-		throw new Error('end must be an instance of Point, not '+end);
+
+	this.comment = null;
+};
+
+function validateLineArg(a) {
+	if( typeof(a) != 'object' ) {
+		throw new Error('Line() called with argument but that argument is not an object.');
 	}
-	this.start = start;
-	this.end = end;
-	this.comment = comment;
+	
+	['start','end'].map( function(attName) {
+		if( a[attName] === undefined ) {
+			throw new Error('Line() called with an object as sole parameter; object does not have a "'+attName+'" attribute.');
+		} else if ( a[attName] instanceof Point ) {
+			// given a Point
+		} else if( typeof(a[attName])=='object' && a[attName].length==2 ) {
+			// given an array of two things
+			if( typeof(a[attName][0]) == 'number' && typeof(a[attName][1])=='number' ) {
+				a[attName] = new Point(
+					a[attName][0],
+					a[attName][1]
+				);
+			} else {
+				throw new Error('Line() called with an object as sole parameter; attribute "'+attName+'" is not an array containing two numbers.');
+			}
+		} else {
+			throw new Error('Line() called with an object as sole parameter; attribute "'+attName+'" is neither a Point nor an object.');
+		}
+
+	});
+	
+	return a
 };
 
 Line.prototype = Object.create(Shape.prototype);
@@ -180,22 +226,77 @@ function bezier(params) {
 };
 
 var Bezier = function(start, sctl, ectl, end) {
-	if( ! (start instanceof Point) ) {
-		throw new Error('start must be an instance of Point, not '+start);
+
+	if( arguments.length == 4 ) {
+	
+		/* constructor call in the traditional manner */
+	
+		var start = arguments[0];
+		var sctl  = arguments[1];
+		var ectl  = arguments[2];
+		var end   = arguments[3];
+
+		if( ! (start instanceof Point) ) {
+			throw new Error('start must be an instance of Point, not '+start);
+		}
+		if( ! (end instanceof Point) ) {
+			throw new Error('end must be an instance of Point, not '+end);
+		}
+		if( ! (sctl instanceof Point) ) {
+			throw new Error('sctl must be an instance of Point, not '+start);
+		}
+		if( ! (ectl instanceof Point) ) {
+			throw new Error('ectl must be an instance of Point, not '+end);
+		}
+	
+		this.start = start;
+		this.sctl = sctl;
+		this.ectl = ectl;
+		this.end = end;
+		
+	} else if( arguments.length==1 ) {
+	
+		/* constructor call with a single object containing parameters */
+
+		var a = validateBezierArg(arguments[0]);
+
+		this.start = a.start;
+		this.sctl = a.sctl;
+		this.end = a.end;
+		this.ectl = a.ectl;
+		
+	} else {
+		throw new Error('Bezier() called with incorrect number of arguments');
 	}
-	if( ! (end instanceof Point) ) {
-		throw new Error('end must be an instance of Point, not '+end);
+};
+
+function validateBezierArg(a) {
+	if( typeof(a)  != 'object' ) {
+		throw new Error('Bezier() called with one argument but that argument is not an object.');
 	}
-	if( ! (sctl instanceof Point) ) {
-		throw new Error('sctl must be an instance of Point, not '+start);
-	}
-	if( ! (ectl instanceof Point) ) {
-		throw new Error('ectl must be an instance of Point, not '+end);
-	}
-	this.start = start;
-	this.sctl = sctl;
-	this.ectl = ectl;
-	this.end = end;
+			
+	// make sure the object has all required parameters
+	['start','sctl','end','ectl'].map( function(attName) {
+		if( a[attName] === undefined ) {
+			throw new Error('Bezier() called with an object as sole parameter; object does not have a "'+attName+'" attribute.');
+		} else if ( a[attName] instanceof Point ) {
+			// given a Point
+		} else if( typeof(a[attName])=='object' && a[attName].length==2 ) {
+			// given an array of two things
+			if( typeof(a[attName][0]) == 'number' && typeof(a[attName][1])=='number' ) {
+				a[attName] = new Point(
+					a[attName][0],
+					a[attName][1]
+				);
+			} else {
+				throw new Error('Bezier() called with an object as sole parameter; attribute "'+attName+'" is not an array containing two numbers.');
+			}
+		} else {
+			throw new Error('Bezier() called with an object as sole parameter; attribute "'+attName+'" is neither a Point nor an object.');
+		}
+	});
+
+	return a;
 };
 
 Bezier.prototype = Object.create(Shape.prototype);
@@ -278,6 +379,8 @@ var Arc = function(start, end, radius, large, clockwise) {
 	this.clockwise = clockwise;
 };
 
+Arc.prototype = Object.create(Shape.prototype);
+
 Arc.prototype.getPointNames = function() {
 	return ['start','end'];
 };
@@ -324,6 +427,18 @@ Arc.prototype.scaleBy = function(s) {
 		clockwise = this.clockwise
 	);
 }
+
+Arc.prototype.xlateAngular = function(a, d) {
+	return new Arc(
+		start  = this.start.xlateAngular(a,d),
+		end    = this.end.xlateAngular(a,d),
+		radius = this.radius,
+		large  = this.large,
+		clockwise = this.clockwise
+	);
+}
+
+//////////////////////////////////////////////////////////////
 
 function degreesToRadians(d) {
 	return (d*Math.PI) / 180;
