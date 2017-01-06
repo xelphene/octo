@@ -29,6 +29,10 @@ Point.prototype.xlateAngular = function(a, d) {
 	return P( this.x+w, this.y+h );
 };
 
+Point.prototype.ymirror = function() {
+	return P( -this.x, this.y );
+};
+
 function P(x,y) {
 	return new Point(x,y);
 };
@@ -356,7 +360,7 @@ Bezier.prototype.xlateAngular = function(a, d) {
 
 /////////////////////////////////////////////////////////////
 
-var Arc = function(start, end, radius, large, clockwise) {
+var Arc_OLD = function(start, end, radius, large, clockwise) {
 	if( ! (start instanceof Point) ) {
 		throw new Error('start must be an instance of Point, not '+start);
 	}
@@ -377,6 +381,102 @@ var Arc = function(start, end, radius, large, clockwise) {
 	this.radius = radius;
 	this.large = large;
 	this.clockwise = clockwise;
+};
+
+var Arc = function() {
+	if( arguments.length == 5 ) {
+		/* constructor call in the traditional manner */
+		
+		var start = arguments[0];
+		var end = arguments[1];
+		var radius = arguments[2];
+		var large = arguments[3];
+		var clockwise = arguments[4];
+		
+		if( ! (start instanceof Point) ) {
+			throw new Error('start must be an instance of Point, not '+start);
+		}
+		if( ! (end instanceof Point) ) {
+			throw new Error('end must be an instance of Point, not '+end);
+		}
+		if( typeof(radius) != 'number' ) {
+			throw new Error('radius must be a number, not '+radius);
+		}
+		if( typeof(large) != 'boolean' ) {
+			throw new Error('large must be a boolean, not '+large);
+		}
+		if( typeof(clockwise) != 'boolean' ) {
+			throw new Error('clockwise must be a boolean, not '+clockwise);
+		}
+
+		this.start = start;
+		this.end = end;
+		this.radius = radius;
+		this.large = large;
+		this.clockwise = clockwise;
+			
+	} else if( arguments.length==1 ) {
+		/* constructor call with a single object containing parameters */
+		var a = validateArcArg(arguments[0]);
+		
+		this.start = a.start;
+		this.end = a.end;
+		this.radius = a.radius;
+		this.large = a.large;
+		this.clockwise = a.clockwise;
+	} else {
+		throw new Error('Arc() called with incorrect number of arguments');
+	}
+};
+
+function validateArcArg(a) {
+	if( typeof(a)  != 'object' ) {
+		throw new Error('Bezier() called with one argument but that argument is not an object.');
+	}
+
+	// make sure the object has valid start,end Point attributes
+	// transform an array of two numbers into a Point if needed.
+	['start','end'].map( function(attName) {
+		if( a[attName] === undefined ) {
+			throw new Error('Arc() called with an object as sole parameter; object does not have a "'+attName+'" attribute.');
+		} else if ( a[attName] instanceof Point ) {
+			// given a Point
+		} else if( typeof(a[attName])=='object' && a[attName].length==2 ) {
+			// given an array of two things
+			if( typeof(a[attName][0]) == 'number' && typeof(a[attName][1])=='number' ) {
+				a[attName] = new Point(
+					a[attName][0],
+					a[attName][1]
+				);
+			} else {
+				throw new Error('Arc() called with an object as sole parameter; attribute "'+attName+'" is not an array containing two numbers.');
+			}
+		} else {
+			throw new Error('Arc() called with an object as sole parameter; attribute "'+attName+'" is neither a Point nor an object.');
+		}
+	});
+	
+	// start and end are valid.
+	
+	if( a.radius === undefined ) {
+		throw new Error('Arc() called with an object as sole parameter; object does not have a radius attribute');
+	}
+	if( typeof(a.radius) != 'number' ) {
+		throw new Error('Arc() called with an object as sole parameter; radius attribute is not a number');
+	}
+	
+	// start, end, radius are valid. now validate the boolean params.
+	
+	['large','clockwise'].map( function(attName) {
+		if( a[attName] === undefined ) {
+			throw new Error('Arc() called with an object as sole parameter; object does not have a "'+attName+'" attribute.');
+		}
+		if( typeof(a[attName]) != 'boolean' ) {
+			throw new Error('Arc() called with an object as sole parameter; "'+attName+'" attribute is not a boolean.');
+		}
+	});
+
+	return a;
 };
 
 Arc.prototype = Object.create(Shape.prototype);
@@ -466,6 +566,32 @@ function tan(d) {
 	)
 }
 
+//////////////////////////////////////////////////////////////
+
+function circleFromPoints( a, b, c ) {
+	var r = new Line(a,b);
+	var t = new Line(b,c);
+	
+	// compute the X coordinate of the center
+	var n = ( r.slope() * t.slope() * (c.y-a.y)  +  r.slope() * (b.x+c.x)  -  t.slope() * (a.x+b.x) );
+	var d = 2 * ( r.slope() - t.slope() );
+	var x = n/d;
+	
+	// compute the Y coordinate of the center
+	var y = (-1.0/r.slope()) * (x - (a.x+b.x)/2.0) + (a.y+b.y)/2.0;
+	
+	// compute the radius
+	var radius = Math.sqrt( 
+		Math.pow(b.x-x, 2) + Math.pow(b.y-y, 2)
+	);
+	
+	return {
+		centerX: x,
+		centerY: y,
+		radius: radius
+	};
+};
+
 
 /////////////////////////////////////////////////////////////
 
@@ -476,3 +602,4 @@ exports.Bezier = Bezier;
 exports.Arc = Arc;
 exports.P = P;
 exports.bezier = bezier;
+exports.circleFromPoints = circleFromPoints;
