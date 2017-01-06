@@ -123,9 +123,9 @@ function makept(unit) {
 function computeDocSize(pattern, part) {
 	var pt = makept(pattern.unit);
 
-	var width = Math.abs(part.bbox.left - part.bbox.right);
+	var width = Math.abs(part.getBoundingBox().left - part.getBoundingBox().right);
 	width = pt(width);
-	var height = Math.abs(part.bbox.bottom - part.bbox.top);
+	var height = Math.abs(part.getBoundingBox().bottom - part.getBoundingBox().top);
 	height = pt(height);
 
 	return {
@@ -269,6 +269,7 @@ function renderPartScaled(pattern, part, pdfdoc, pageSize, pageMargin, gridSpaci
 	// the "space" option to dash() doesn't seem to do anything... PDFKit problem?
 	pdfdoc.dash(length=2, space=10);
 	pdfdoc.strokeOpacity(0.2);
+	console.log('scaledPart.width: ' + scaled.scaledPart.width() );
 	var gridEndX = startX + scaled.scaledPart.width();
 	for( var x = startX; x<=gridEndX; x+=gridSpacing ) {
 		pdfdoc.moveTo( x, startY );
@@ -394,9 +395,9 @@ function coordXform(pattern, part) {
 	*/
 
 	// always move everything down by the top's distance above the y-axis
-	var xly = pt(part.bbox.top);
+	var xly = pt(part.getBoundingBox().top);
 	// always move everything right by the left's distance from the x-axis
-	var xlx = pt(-part.bbox.left);
+	var xlx = pt(-part.getBoundingBox().left);
 	
 	shapes = shapes.map( function(s) {
 		return s.xlate(xlx, xly);
@@ -424,10 +425,12 @@ function pdfizePattern(pattern) {
 	
 	pattern.parts.map( function(part) {
 		ppart = new Part();
-		ppart.bbox.left = 0;
-		ppart.bbox.top = 0;
-		ppart.bbox.right = computeDocSize(pattern, part).x;
-		ppart.bbox.bottom = computeDocSize(pattern, part).y;
+		ppart.setBoundingBox({
+			left: 0,
+			top: 0,
+			right: computeDocSize(pattern, part).x,
+			bottom: computeDocSize(pattern, part).y
+		});
 		ppart.title = part.title;
 		ppart.shapes = coordXform(pattern, part);
 		ppattern.parts.push(ppart);
@@ -444,10 +447,10 @@ function logPattern(p, f) {
 	p.parts.forEach( function(part, index) {
 		f('Part '+(index+1)+' / '+p.parts.length+': '+part.title);
 		f('  Bounding Box:');
-		f('    top : '+part.bbox.top);
-		f('    bot : '+part.bbox.bottom);
-		f('    left: '+part.bbox.left);
-		f('    rght: '+part.bbox.right);
+		f('    top : '+part.getBoundingBox().top);
+		f('    bot : '+part.getBoundingBox().bottom);
+		f('    left: '+part.getBoundingBox().left);
+		f('    rght: '+part.getBoundingBox().right);
 		f('  Shapes:');
 		part.shapes.forEach( function(shape,sindex) {
 			f('    '+sindex+': '+shape);
@@ -461,10 +464,10 @@ function logPart(part, f) {
 	}
 	f('Part: '+part.title);
 	f('  Bounding Box:');
-	f('    top : '+part.bbox.top);
-	f('    bot : '+part.bbox.bottom);
-	f('    left: '+part.bbox.left);
-	f('    rght: '+part.bbox.right);
+	f('    top : '+part.getBoundingBox().top);
+	f('    bot : '+part.getBoundingBox().bottom);
+	f('    left: '+part.getBoundingBox().left);
+	f('    rght: '+part.getBoundingBox().right);
 	f('  Shapes:');
 	part.shapes.forEach( function(shape,sindex) {
 		f('    '+sindex+': '+shape);

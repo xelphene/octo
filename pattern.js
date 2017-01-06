@@ -21,10 +21,10 @@ Pattern.prototype.log = function(f) {
 		// = this' assignment above.
 		f('Part '+(index+1)+' / '+pattern.parts.length+': '+part.title);
 		f('  Bounding Box:');
-		f('    top : '+part.bbox.top);
-		f('    bot : '+part.bbox.bottom);
-		f('    left: '+part.bbox.left);
-		f('    rght: '+part.bbox.right);
+		f('    top : '+part.getBoundingBox().top);
+		f('    bot : '+part.getBoundingBox().bottom);
+		f('    left: '+part.getBoundingBox().left);
+		f('    rght: '+part.getBoundingBox().right);
 		f('  Shapes:');
 		part.shapes.forEach( function(shape,sindex) {
 			if( shape.comment ) {
@@ -36,13 +36,23 @@ Pattern.prototype.log = function(f) {
 	});
 };
 
+Pattern.prototype.newPart = function() {
+	var p = new Part();
+	this.parts.push(p);
+	return p;
+};
+
 var Part = function() {
 	this.shapes = [];
+	/*
 	this.bbox = new Object();
 	this.bbox.left = null;
 	this.bbox.right = null;
 	this.bbox.top = null;
 	this.bbox.bottom = null;
+	*/
+	this._bbox = null; // null means auto
+	this._autoBoundingBoxPadding = 0;
 	this.title = 'Untitled Part';
 };
 
@@ -56,7 +66,7 @@ Part.prototype.getExtent = function(axis,direction) {
 	return max;
 };
 
-Part.prototype.getAutoBBox = function(padding) {
+Part.prototype.getAutoBoundingBox = function(padding) {
 	var bbox = {};
 	if( padding==null ) {
 		padding=0;
@@ -68,25 +78,51 @@ Part.prototype.getAutoBBox = function(padding) {
 	return bbox;
 };
 
-Part.prototype.setAutoBBox = function(padding) {
-	this.bbox = this.getAutoBBox(padding);
+Part.prototype.getBoundingBox = function() {
+	if( this._bbox == null ) {
+		return this.getAutoBoundingBox(this._autoBoundingBoxPadding);
+	} else {
+		return this._bbox;
+	}
+};
+
+/*
+Part.prototype.setAutoBoundingBox = function(padding) {
+	this._bbox = this.getAutoBoundingBox(padding);
+};
+*/
+
+Part.prototype.setAutoBoundingBox = function() { 
+	this._bbox = null;
+};
+
+Part.prototype.setAutoBoundingBoxPadding = function(padding) {
+	if( typeof(padding) != 'number') {
+		throw new Error('number required for padding argument, not '+padding);
+	}
+	this._autoBoundingBoxPadding = padding;
+};
+
+Part.prototype.setBoundingBox = function(bbox) {
+	// TODO: validate
+	this._bbox = bbox;
 };
 
 Part.prototype.addShape = function(shape) {
 	isShape = (shape instanceof geom.Bezier) || (shape instanceof geom.Line) || (shape instanceof geom.Arc);
 	if( ! isShape ) {
-		throw new Error('shape required for SubPattern.addShape(), not '+shape);
+		throw new Error('shape required for Part.addShape(), not '+shape);
 	}
 	this.shapes.push(shape);
 };
 
 
 Part.prototype.height = function() {
-	return Math.abs(this.bbox.bottom - this.bbox.top);
+	return Math.abs(this.getBoundingBox().bottom - this.getBoundingBox().top);
 };
 
 Part.prototype.width = function() {
-	return Math.abs(this.bbox.left - this.bbox.right);
+	return Math.abs(this.getBoundingBox().left - this.getBoundingBox().right);
 };
 
 Part.prototype.size = function() {
@@ -121,11 +157,14 @@ Part.prototype.scaleBy = function(s) {
 	//console.log('scaleBy '+sx+' '+sy);
 	spart = new Part();
 	spart.title = this.title;
-	spart.bbox.left = this.bbox.left * s;
-	spart.bbox.right = this.bbox.right * s;
-	spart.bbox.top = this.bbox.top * s;
-	spart.bbox.bottom = this.bbox.bottom * s;
-	
+
+	spart.setBoundingBox({
+		left: this.getBoundingBox().left * s,
+		right: this.getBoundingBox().right * s,
+		top: this.getBoundingBox().top * s,
+		bottom: this.getBoundingBox().bottom * s
+	});
+
 	this.shapes.map( function(shape) {
 		spart.shapes.push( shape.scaleBy(s) );
 	});
@@ -158,6 +197,8 @@ function loadFromYaml(path) {
 		
 		part.title = p.title;
 
+		/*
+		// TODO: everything to do with bbox is broken after the auto bbox changes
 		["left","right","top","bottom"].map( function(side) {
 			if( typeof p.bbox[side] === 'undefined' ) {
 				throw "Bounding box "+side+" is undefined in part "+part.title;
@@ -168,6 +209,7 @@ function loadFromYaml(path) {
 		part.bbox.right = p.bbox.right;
 		part.bbox.top = p.bbox.top;
 		part.bbox.bottom = p.bbox.bottom;
+		*/
 
 		if( typeof p.shapes === 'undefined' ) {
 			p.shapes = [];
