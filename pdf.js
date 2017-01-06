@@ -165,10 +165,8 @@ function renderPartPaged(pattern, part, pdfdoc, pageSize, pageMargin) {
 	var pages = paginate(part.size(), windowSize);
 	
 	pages.forEach( function(page, index) {
-		/*
-		console.log('***** new page '+(index)+' / '+pages.length+' ****');
-		console.log('  xlation for this page: '+page.xlx+','+page.xly);
-		*/
+		//console.log('***** new page '+(index)+' / '+pages.length+' ****');
+		//console.log('  xlation for this page: '+page.xlx+','+page.xly);
 		
 		// draw the page margins and cut off anything beyond them
 		drawPageMargins(pdfdoc, pageSize, pageMargin);
@@ -189,8 +187,8 @@ function renderPartPaged(pattern, part, pdfdoc, pageSize, pageMargin) {
 			return s.xlate( pageMargin.x, pageMargin.y );
 		});
 
-		/*
 		// log the translated shapes
+		/*
 		console.log('  shapes xlated for this page:');
 		windowShapes.map( function(s) { 
 			console.log('    '+s); 
@@ -269,7 +267,6 @@ function renderPartScaled(pattern, part, pdfdoc, pageSize, pageMargin, gridSpaci
 	// the "space" option to dash() doesn't seem to do anything... PDFKit problem?
 	pdfdoc.dash(length=2, space=10);
 	pdfdoc.strokeOpacity(0.2);
-	console.log('scaledPart.width: ' + scaled.scaledPart.width() );
 	var gridEndX = startX + scaled.scaledPart.width();
 	for( var x = startX; x<=gridEndX; x+=gridSpacing ) {
 		pdfdoc.moveTo( x, startY );

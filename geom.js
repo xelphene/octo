@@ -7,6 +7,12 @@ function roundTo( value, precision ) {
 /////////////////////////////////////////////////////
 
 var Point = function(x,y) {
+	if( typeof(x)!='number' || isNaN(x) ) {
+		throw new Error('number required for x to Point constructor, not '+x);
+	}
+	if( typeof(y)!='number' || isNaN(y) ) {
+		throw new Error('number required for x to Point constructor, not '+y);
+	}
 	this.x = x;
 	this.y = y;
 };
@@ -72,14 +78,31 @@ var Line = function() {
 		var start = arguments[0];
 		var end = arguments[1];
 		
-		if( ! (start instanceof Point) ) {
+		if( start instanceof Point ) {
+			this.start = start;
+		} else if( typeof(start)=='object' && start.length==2 ) {
+			if( typeof(start[0]) == 'number' && typeof(start[1])=='number' ) {
+				this.start = new Point(start[0], start[1]);
+			} else {
+				throw new Error('if start is an array, it must be an array of two numbers, not '+start);
+			}
+		} else {
 			throw new Error('start must be an instance of Point, not '+start);
 		}
-		if( ! (end instanceof Point) ) {
+
+		if( end instanceof Point ) {
+			this.end = end;
+		} else if( typeof(end)=='object' && end.length==2 ) {
+			if( typeof(end[0]) == 'number' && typeof(end[1])=='number' ) {
+				this.end = new Point(end[0], end[1]);
+			} else {
+				throw new Error('if end is an array, it must be an array of two numbers, not '+end);
+			}
+		} else {
 			throw new Error('end must be an instance of Point, not '+end);
 		}
-		this.start = start;
-		this.end = end;
+
+
 	} else if( arguments.length==1 ) {
 		/* constructor call with a single object containing parameters */
 		
@@ -480,6 +503,11 @@ function validateArcArg(a) {
 };
 
 Arc.prototype = Object.create(Shape.prototype);
+
+Arc.prototype.center = function() {
+	// TODO: make this computed in the future
+	return this.preComputedCenter;
+};
 
 Arc.prototype.getPointNames = function() {
 	return ['start','end'];
