@@ -69,6 +69,7 @@ Shape.prototype.getExtent = function(axis, direction) {
 	return max*direction;
 };
 
+
 ////////////////////////////////////////////////////////////////
 
 var Line = function() {
@@ -226,7 +227,7 @@ Line.prototype.xlateAngular = function(a, d) {
 	);
 };
 
-Line.prototype.parallelLine = function(d) { 
+Line.prototype.getParallel = function(d) { 
 	/*
 	 * return a new Line parallel AND distance d from this one.
 	 *
@@ -564,6 +565,16 @@ Arc.prototype.xlateAngular = function(a, d) {
 		large  = this.large,
 		clockwise = this.clockwise
 	);
+}
+
+Arc.prototype.getParallel = function(d) {
+	// this may give unintuitive results for arc angles>90
+	var line = new Line({
+		start: this.start,
+		end: this.end
+	});
+	var xangle = line.xangle();
+	return this.xlateAngular(xangle+90, d);
 }
 
 //////////////////////////////////////////////////////////////
