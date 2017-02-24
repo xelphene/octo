@@ -13,7 +13,6 @@ Pattern.prototype.log = function(f) {
 	}
 	f('Pattern title: '+this.title);
 	f('Pattern units: '+this.unit);
-	f('asdf '+this.parts.length);
 	var pattern = this;
 	this.parts.forEach( function(part, index) {
 		// "this" in here refers to something different than 'this' just
