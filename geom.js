@@ -1,8 +1,5 @@
 
-function roundTo( value, precision ) {
-	var m = Math.pow(10,precision);
-	return Math.round(value*m)/m;
-}
+const roundTo = require('./util.js').roundTo;
 
 /////////////////////////////////////////////////////
 
@@ -342,10 +339,10 @@ Bezier.prototype.ymirror = function() {
 
 Bezier.prototype.toString = function() {
 	return (
-		'Bezier '+this.start.x+','+this.start.y+
-		' ['+this.sctl.x+','+this.sctl.y+'] -> '+
-		this.end.x+','+this.end.y+
-		' ['+this.ectl.x+','+this.ectl.y+']'
+		'Bezier '+roundTo(this.start.x,3)+','+roundTo(this.start.y,3)+
+		' ['+roundTo(this.sctl.x,3)+','+roundTo(this.sctl.y,3)+'] -> '+
+		roundTo(this.end.x,3)+','+roundTo(this.end.y,3)+
+		' ['+roundTo(this.ectl.x,3)+','+roundTo(this.ectl.y,3)+']'
 	);
 }
 

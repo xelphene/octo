@@ -1,5 +1,6 @@
 
 const geom = require('./geom.js');
+const roundTo = require('./util.js').roundTo;
 
 var Pattern = function () {
 	this.unit = 'inch';
@@ -20,10 +21,10 @@ Pattern.prototype.log = function(f) {
 		// = this' assignment above.
 		f('Part '+(index+1)+' / '+pattern.parts.length+': '+part.title);
 		f('  Bounding Box:');
-		f('    top : '+part.getBoundingBox().top);
-		f('    bot : '+part.getBoundingBox().bottom);
-		f('    left: '+part.getBoundingBox().left);
-		f('    rght: '+part.getBoundingBox().right);
+		f('    top : '+roundTo(part.getBoundingBox().top, 3));
+		f('    bot : '+roundTo(part.getBoundingBox().bottom, 3));
+		f('    left: '+roundTo(part.getBoundingBox().left, 3));
+		f('    rght: '+roundTo(part.getBoundingBox().right, 3));
 		f('  Shapes:');
 		part.shapes.forEach( function(shape,sindex) {
 			if( shape.comment ) {
