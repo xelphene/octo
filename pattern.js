@@ -42,6 +42,10 @@ Pattern.prototype.newPart = function() {
 	return p;
 };
 
+Pattern.prototype.addPart = function(part) {
+	this.parts.push(part);
+};
+
 var Part = function() {
 	this.shapes = [];
 	/*
