@@ -232,6 +232,7 @@ function renderPartPaged(pattern, part, pdfdoc, pageSize, pageMargin) {
 // }
 function renderPartScaled(pattern, part, pdfdoc, pageSize, pageMargin, gridSpacing, origUnit) 
 {
+	pdfdoc.fontSize(12);
 	pdfdoc.text('Pattern: '+pattern.title, pageMargin.x, pageMargin.y);
 	pdfdoc.text('Part: '+part.title);
 	pdfdoc.text('Units: '+origUnit);
@@ -471,21 +472,75 @@ function logPart(part, f) {
 	});
 };
 
-function genpdf(pattern, outfn) {
-	var pageSize = { x: 8.5*72, y: 11*72 };
-	//var pageSize = { x: 5*72, y: 5*72 };
+var PageOptions = function() {
+	this._pageWidth = 8.5*72;
+	this._pageHeight = 11*72;
+	this._layout = 'portrait';
+}
 
+PageOptions.prototype.setLayoutPortrait = function() {
+	this._layout = 'portrait';
+}
+
+PageOptions.prototype.setLayoutLandscape = function() {
+	this._layout = 'landscape';
+}
+
+PageOptions.prototype.getLayout = function() {
+	return this._layout;
+}
+
+PageOptions.prototype.setPageSize = function(width, height) {
+	this._pageWidth = width;
+	this._pageHeight = height;
+}
+
+PageOptions.prototype.getPageWidth = function() { 
+	return this._pageWidth;
+}
+
+PageOptions.prototype.getPageHeight = function() {
+	return this._pageHeight;
+}
+
+PageOptions.prototype.getMaxX = function() {
+	if( this._layout=='portrait' ) {
+		return this._pageWidth;
+	} else {
+		return this._pageHeight;
+	}
+}
+
+PageOptions.prototype.getMaxY = function() {
+	if( this._layout=='portrait' ) {
+		return this._pageHeight;
+	} else {
+		return this._pageWidth;
+	}
+}
+
+function genpdf(pattern, outfn, pageOptions) {
+	if( pageOptions==null ) {
+		pageOptions = new PageOptions();
+	}
+	
 	var pageMargin = {
 		x: 0.5*72,
 		y: 0.5*72
 	};
 
-	var pageOptions = {
-		size: [pageSize.x, pageSize.y],
+	var pdfkitPageOptions = {
+		size: [pageOptions.getPageWidth(), pageOptions.getPageHeight()],
+		layout: pageOptions.getLayout(),
 		margin: 0
 	};
 
-	doc = new PDFDocument(pageOptions);
+	var octoPageSize = {
+		x: pageOptions.getMaxX(),
+		y: pageOptions.getMaxY()
+	};
+	
+	doc = new PDFDocument(pdfkitPageOptions);
 	doc.pipe(fs.createWriteStream(outfn));
 	doc.lineWidth(1);
 
@@ -496,9 +551,9 @@ function genpdf(pattern, outfn) {
 	previewGridSpacing = makept(pattern.unit)(1);
 
 	ppattern.parts.forEach( function(ppart, index) {
-		renderPartScaled(ppattern, ppart, doc, pageSize, pageMargin, previewGridSpacing, origUnit=pattern.unit);
+		renderPartScaled(ppattern, ppart, doc, octoPageSize, pageMargin, previewGridSpacing, origUnit=pattern.unit);
 		doc.addPage();
-		renderPartPaged(ppattern, ppart, doc, pageSize, pageMargin);
+		renderPartPaged(ppattern, ppart, doc, octoPageSize, pageMargin);
 		if( index < ppattern.parts.length-1 ) {
 			doc.addPage();
 		}
@@ -508,3 +563,4 @@ function genpdf(pattern, outfn) {
 };
 
 exports.genpdf = genpdf;
+exports.PageOptions = PageOptions;
