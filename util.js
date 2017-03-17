@@ -19,6 +19,18 @@ function cos(d) {
 	)
 }
 
+function tan(d) {
+	return Math.tan(
+		degreesToRadians(d)
+	)
+}
+
+function atan(x) {
+	return radiansToDegrees(
+		Math.atan(x)
+	);
+}
+
 function roundTo( value, precision ) {
 	var m = Math.pow(10,precision);
 	return Math.round(value*m)/m;
@@ -27,5 +39,7 @@ function roundTo( value, precision ) {
 exports.roundTo = roundTo;
 exports.cos = cos;
 exports.sin = sin;
+exports.tan = tan;
+exports.atan = atan;
 exports.radiansToDegrees = radiansToDegrees;
 exports.degreesToRadians = degreesToRadians;
