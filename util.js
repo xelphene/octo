@@ -37,6 +37,12 @@ function acos(x) {
 	);
 }
 
+function asin(x) {
+	return radiansToDegrees(
+		Math.asin(x)
+	);
+}
+
 function roundTo( value, precision ) {
 	var m = Math.pow(10,precision);
 	return Math.round(value*m)/m;
@@ -48,5 +54,6 @@ exports.sin = sin;
 exports.tan = tan;
 exports.atan = atan;
 exports.acos = acos;
+exports.asin = asin;
 exports.radiansToDegrees = radiansToDegrees;
 exports.degreesToRadians = degreesToRadians;

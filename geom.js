@@ -1,5 +1,12 @@
 
-const roundTo = require('./util.js').roundTo;
+const util = require('./util.js');
+const roundTo = util.roundTo;
+const degreesToRadians = util.degreesToRadians;
+const radiansToDegrees = util.radiansToDegrees;
+const sin  = util.sin;
+const cos  = util.cos;
+const tan  = util.atan;
+const asin = util.asin;
 
 /////////////////////////////////////////////////////
 
@@ -574,32 +581,15 @@ Arc.prototype.getParallel = function(d) {
 	return this.xlateAngular(xangle+90, d);
 }
 
-//////////////////////////////////////////////////////////////
-
-function degreesToRadians(d) {
-	return (d*Math.PI) / 180;
+Arc.prototype.chord = function() {
+	return new Line(this.start, this.end);
 }
 
-function radiansToDegrees(r) {
-	return r * (180/Math.PI);
-}
-
-function sin(d) {
-	return Math.sin(
-		degreesToRadians(d)
-	)
-}
-
-function cos(d) {
-	return Math.cos(
-		degreesToRadians(d)
-	)
-}
-
-function tan(d) {
-	return Math.tan(
-		degreesToRadians(d)
-	)
+Arc.prototype.len = function() {
+	return 2*asin( 
+		(this.chord().len()/this.radius)  /
+		2 
+	);
 }
 
 //////////////////////////////////////////////////////////////
