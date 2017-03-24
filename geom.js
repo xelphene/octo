@@ -585,7 +585,7 @@ Arc.prototype.chord = function() {
 	return new Line(this.start, this.end);
 }
 
-Arc.prototype.len = function() {
+Arc.prototype.angle = function() {
 	return 2*asin( 
 		(this.chord().len()/this.radius)  /
 		2 
