@@ -586,10 +586,22 @@ Arc.prototype.chord = function() {
 }
 
 Arc.prototype.angle = function() {
-	return 2*asin( 
-		(this.chord().len()/this.radius)  /
-		2 
-	);
+	if( this.large==false ) {
+		return 2*asin( 
+			(this.chord().len()/this.radius)  /
+			2 
+		);
+	} else {
+		return 360 - 2*asin( 
+			(this.chord().len()/this.radius)  /
+			2 
+		);
+	}
+}
+
+Arc.prototype.len = function() {
+	var c = this.radius*Math.PI*2;
+	return c * (this.angle()/360);
 }
 
 //////////////////////////////////////////////////////////////
