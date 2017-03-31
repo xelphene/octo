@@ -386,6 +386,81 @@ Bezier.prototype.xlateAngular = function(a, d) {
 	);
 };
 
+Bezier.prototype.interval = function(t) {
+	var x = (
+		this.start.x *                     Math.pow((1-t),3) + // start * (1-t)^3
+		this.sctl.x  * 3 * t *             Math.pow((1-t),2) + // sctl * 3 * (1-t)^2
+		this.ectl.x  * 3 * Math.pow(t,2) * (1-t)             + // ectl * 3 * t^2 * (1-t)
+		this.end.x   *     Math.pow(t,3)                       // end * t^3
+	);
+	var y = (
+		this.start.y *                     Math.pow((1-t),3) + // start * (1-t)^3
+		this.sctl.y  * 3 * t *             Math.pow((1-t),2) + // sctl * 3 * (1-t)^2
+		this.ectl.y  * 3 * Math.pow(t,2) * (1-t)             + // ectl * 3 * t^2 * (1-t)
+		this.end.y   *     Math.pow(t,3)                       // end * t^3
+	);
+	return new Point(x,y);
+}
+
+Bezier.prototype.intervalDeriv = function(t) {
+	var x = (
+		3 * Math.pow((1-t),2) * (this.sctl.x-this.start.x) + // 3 * (1-t)^2 * (sctl-start)
+		6 * (1-t) * t * (this.ectl.x-this.sctl.x) +          
+		3 * Math.pow(t,2) * (this.end.x-this.ectl.x)
+	);
+	var y = (
+		3 * Math.pow((1-t),2) * (this.sctl.y-this.start.y) + // 3 * (1-t)^2 * (sctl-start)
+		6 * (1-t) * t * (this.ectl.y-this.sctl.y) +          
+		3 * Math.pow(t,2) * (this.end.y-this.ectl.y)
+	);
+	return new Point(x,y);
+	//return x/y;
+}
+
+Bezier.prototype.flatten = function(numLines) {
+	if( numLines < 1 ) {
+		throw new Error('numLines must be >=1');
+	}
+	var lines = [];
+	var priorT=null;
+	for( var i=0; i<=numLines; i++ ) {
+		var t = i*(1/numLines);
+		//console.log('i='+i+' t='+t+' priorT='+priorT);
+		
+		if( priorT != null ) {
+			var l = new Line({
+				start: this.interval(priorT),
+				end: this.interval(t)
+			});
+			//console.log('   '+l);
+			lines.push(l);
+		}
+		
+		priorT=t;
+	}
+	return lines;
+}
+
+Bezier.prototype.len = function(precision) {
+
+	/* approximate the length of this Bezier curve. precision must be a
+	positive integer.  The greater the precision, the more accurate this
+	length will be but the longer it will take.  */
+
+	/* This works based on approximating the curve with straight line
+	 * segments drawn from start to end.  precision is the number of
+	 * segments.  */
+
+	if( precision === null ) {
+		precision=10;
+	}
+	var sum=0;
+	this.flatten(precision).map( (line) => {
+		sum+=line.len();
+	});
+	return sum;
+}
+
 /////////////////////////////////////////////////////////////
 
 var Arc_OLD = function(start, end, radius, large, clockwise) {
