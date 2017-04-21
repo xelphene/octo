@@ -463,29 +463,6 @@ Bezier.prototype.len = function(precision) {
 
 /////////////////////////////////////////////////////////////
 
-var Arc_OLD = function(start, end, radius, large, clockwise) {
-	if( ! (start instanceof Point) ) {
-		throw new Error('start must be an instance of Point, not '+start);
-	}
-	if( ! (end instanceof Point) ) {
-		throw new Error('end must be an instance of Point, not '+end);
-	}
-	if( typeof(radius) != 'number' ) {
-		throw new Error('radius must be a number, not '+radius);
-	}
-	if( typeof(large) != 'boolean' ) {
-		throw new Error('large must be a boolean, not '+large);
-	}
-	if( typeof(clockwise) != 'boolean' ) {
-		throw new Error('clockwise must be a boolean, not '+clockwise);
-	}
-	this.start = start;
-	this.end = end;
-	this.radius = radius;
-	this.large = large;
-	this.clockwise = clockwise;
-};
-
 var Arc = function() {
 	if( arguments.length == 5 ) {
 		/* constructor call in the traditional manner */
