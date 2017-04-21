@@ -476,6 +476,7 @@ var PageOptions = function() {
 	this._pageWidth = 8.5*72;
 	this._pageHeight = 11*72;
 	this._layout = 'portrait';
+	this._sections = 'all';
 }
 
 PageOptions.prototype.setLayoutPortrait = function() {
@@ -484,6 +485,18 @@ PageOptions.prototype.setLayoutPortrait = function() {
 
 PageOptions.prototype.setLayoutLandscape = function() {
 	this._layout = 'landscape';
+}
+
+PageOptions.prototype.setSectionsPreviewsOnly = function() {
+	this._sections = 'previews';
+}
+
+PageOptions.prototype.setSectionsAll = function() {
+	this._sections = 'all';
+}
+
+PageOptions.prototype.getSections = function() {
+	return this._sections;
 }
 
 PageOptions.prototype.getLayout = function() {
@@ -523,7 +536,7 @@ function genpdf(pattern, outfn, pageOptions) {
 	if( pageOptions==null ) {
 		pageOptions = new PageOptions();
 	}
-	
+
 	var pageMargin = {
 		x: 0.5*72,
 		y: 0.5*72
@@ -552,8 +565,10 @@ function genpdf(pattern, outfn, pageOptions) {
 
 	ppattern.parts.forEach( function(ppart, index) {
 		renderPartScaled(ppattern, ppart, doc, octoPageSize, pageMargin, previewGridSpacing, origUnit=pattern.unit);
-		doc.addPage();
-		renderPartPaged(ppattern, ppart, doc, octoPageSize, pageMargin);
+		if( pageOptions.getSections() == 'all' ) {
+			doc.addPage();
+			renderPartPaged(ppattern, ppart, doc, octoPageSize, pageMargin);
+		}
 		if( index < ppattern.parts.length-1 ) {
 			doc.addPage();
 		}
