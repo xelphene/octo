@@ -48,13 +48,53 @@ Pattern.prototype.addPart = function(part) {
 
 var Part = function() {
 	this._shapes = [];
+	this._namedShapes = {};
 	this._bbox = null; // null means auto
 	this._autoBoundingBoxPadding = 0;
 	this.title = 'Untitled Part';
 };
 
 Part.prototype.getShapes = function() {
-	return this._shapes;
+	var shapeList = [];
+	this._shapes.map( (shape) => {
+		shapeList.push(shape);
+	});
+	Object.keys(this._namedShapes).map( (shapeName) => {
+		shapeList.push( this._namedShapes[shapeName] );
+	});
+	return shapeList;
+}
+
+Part.prototype.getNamedShape = function(shapeName) {
+	return this._namedShapes[shapeName];
+}
+
+Part.prototype.getShapeNames = function() {
+	return Object.keys(this._namedShapes);
+}
+
+Part.prototype.addShape = function(shape) {
+	isShape = (shape instanceof geom.Bezier) || (shape instanceof geom.Line) || (shape instanceof geom.Arc);
+	if( ! isShape ) {
+		throw new Error('shape required for Part.addShape(), not '+shape);
+	}
+	this._shapes.push(shape);
+};
+
+Part.prototype.addShapes = function(shapes) {
+	shapes.map( (shape) => {
+		this.addShape(shape);
+	});
+}
+
+Part.prototype.addNamedShape = function(name, shape) {
+	if( typeof(name) != 'string' ) {
+		throw new Error('string required for name parameter, not '+typeof(name));
+	}
+	if( this._namedShapes.hasOwnProperty(name) ) {
+		throw new Error('this Part already has a shape named '+name);
+	}
+	this._namedShapes[name] = shape;
 }
 
 Part.prototype.getExtent = function(axis,direction) {
@@ -109,19 +149,6 @@ Part.prototype.setBoundingBox = function(bbox) {
 	this._bbox = bbox;
 };
 
-Part.prototype.addShape = function(shape) {
-	isShape = (shape instanceof geom.Bezier) || (shape instanceof geom.Line) || (shape instanceof geom.Arc);
-	if( ! isShape ) {
-		throw new Error('shape required for Part.addShape(), not '+shape);
-	}
-	this._shapes.push(shape);
-};
-
-Part.prototype.addShapes = function(shapes) {
-	shapes.map( (shape) => {
-		this.addShape(shape);
-	});
-}
 
 Part.prototype.height = function() {
 	return Math.abs(this.getBoundingBox().bottom - this.getBoundingBox().top);
