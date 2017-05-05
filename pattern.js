@@ -26,7 +26,7 @@ Pattern.prototype.log = function(f) {
 		f('    left: '+roundTo(part.getBoundingBox().left, 3));
 		f('    rght: '+roundTo(part.getBoundingBox().right, 3));
 		f('  Shapes:');
-		part.shapes.forEach( function(shape,sindex) {
+		part.getShapes().forEach( function(shape,sindex) {
 			if( shape.comment ) {
 				f('    '+sindex+': '+shape+' ('+shape.comment+')');
 			} else {
@@ -47,22 +47,19 @@ Pattern.prototype.addPart = function(part) {
 };
 
 var Part = function() {
-	this.shapes = [];
-	/*
-	this.bbox = new Object();
-	this.bbox.left = null;
-	this.bbox.right = null;
-	this.bbox.top = null;
-	this.bbox.bottom = null;
-	*/
+	this._shapes = [];
 	this._bbox = null; // null means auto
 	this._autoBoundingBoxPadding = 0;
 	this.title = 'Untitled Part';
 };
 
+Part.prototype.getShapes = function() {
+	return this._shapes;
+}
+
 Part.prototype.getExtent = function(axis,direction) {
 	var max=null;
-	this.shapes.map( function(shape) {
+	this.getShapes().map( function(shape) {
 		if( max==null || shape.getExtent(axis,direction)*direction > max*direction ) {
 			max = shape.getExtent(axis,direction);
 		}
@@ -117,9 +114,14 @@ Part.prototype.addShape = function(shape) {
 	if( ! isShape ) {
 		throw new Error('shape required for Part.addShape(), not '+shape);
 	}
-	this.shapes.push(shape);
+	this._shapes.push(shape);
 };
 
+Part.prototype.addShapes = function(shapes) {
+	shapes.map( (shape) => {
+		this.addShape(shape);
+	});
+}
 
 Part.prototype.height = function() {
 	return Math.abs(this.getBoundingBox().bottom - this.getBoundingBox().top);
@@ -169,13 +171,12 @@ Part.prototype.scaleBy = function(s) {
 		bottom: this.getBoundingBox().bottom * s
 	});
 
-	this.shapes.map( function(shape) {
-		spart.shapes.push( shape.scaleBy(s) );
+	this.getShapes().map( function(shape) {
+		spart.addShape( shape.scaleBy(s) );
 	});
 	return spart;
 };
 
 exports.Pattern = Pattern;
 exports.Part = Part;
-exports.loadFromYaml = loadFromYaml;
 

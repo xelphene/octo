@@ -179,7 +179,7 @@ function renderPartPaged(pattern, part, pdfdoc, pageSize, pageMargin) {
 		// move all the shapes so the particular region for this page will
 		// be drawn in the page.  the excess that's off the page will just
 		// be ignored by PDFKit
-		var pageShapes = part.shapes.map( function(s) { 
+		var pageShapes = part.getShapes().map( function(s) { 
 			return s.xlate( -page.xlx, -page.xly );
 		});
 		// shift again to accomodate margins
@@ -255,7 +255,7 @@ function renderPartScaled(pattern, part, pdfdoc, pageSize, pageMargin, gridSpaci
 	gridSpacing = scaled.scaleFactor * gridSpacing;
 
 	// translate all shapes to fit the preview area
-	var xshapes = scaled.scaledPart.shapes.map( function(s) {
+	var xshapes = scaled.scaledPart.getShapes().map( function(s) {
 		return s.xlate(startX, startY);
 	});
 
@@ -385,7 +385,7 @@ function coordXform(pattern, part) {
 	var pt = makept(pattern.unit);
 	
 	var xformShape = makexformShape(pattern.unit);
-	var shapes = part.shapes.map(xformShape);
+	var shapes = part.getShapes().map(xformShape);
 	/*
 	console.log('--- transformed shapes ---');
 	shapes.map(function (s) { console.log('    '+s.toString()) } );
@@ -430,7 +430,8 @@ function pdfizePattern(pattern) {
 			bottom: computeDocSize(pattern, part).y
 		});
 		ppart.title = part.title;
-		ppart.shapes = coordXform(pattern, part);
+		//ppart.shapes = coordXform(pattern, part);
+		ppart.addShapes( coordXform(pattern, part) );
 		ppattern.parts.push(ppart);
 	});
 	return ppattern;
@@ -450,7 +451,7 @@ function logPattern(p, f) {
 		f('    left: '+part.getBoundingBox().left);
 		f('    rght: '+part.getBoundingBox().right);
 		f('  Shapes:');
-		part.shapes.forEach( function(shape,sindex) {
+		part.getShapes().forEach( function(shape,sindex) {
 			f('    '+sindex+': '+shape);
 		});
 	});
@@ -467,7 +468,7 @@ function logPart(part, f) {
 	f('    left: '+part.getBoundingBox().left);
 	f('    rght: '+part.getBoundingBox().right);
 	f('  Shapes:');
-	part.shapes.forEach( function(shape,sindex) {
+	part.getShapes().forEach( function(shape,sindex) {
 		f('    '+sindex+': '+shape);
 	});
 };
