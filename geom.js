@@ -478,6 +478,7 @@ var Arc = function() {
 		}
 		if( ! (end instanceof Point) ) {
 			throw new Error('end must be an instance of Point, not '+end);
+
 		}
 		if( typeof(radius) != 'number' ) {
 			throw new Error('radius must be a number, not '+radius);
@@ -693,3 +694,4 @@ exports.Arc = Arc;
 exports.P = P;
 exports.bezier = bezier;
 exports.circleFromPoints = circleFromPoints;
+exports.Shape = Shape;
