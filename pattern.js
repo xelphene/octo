@@ -47,6 +47,7 @@ Pattern.prototype.addPart = function(part) {
 };
 
 var Part = function() {
+	this.shapes = null;
 	this._shapes = [];
 	this._namedShapes = {};
 	this._bbox = null; // null means auto
@@ -56,6 +57,11 @@ var Part = function() {
 
 Part.prototype.getShapes = function() {
 	var shapeList = [];
+
+	if( this.shapes != null ) {
+		shapeList = shapeList.concat( geom.extractShapesFromObject(this.shapes) );
+	}
+
 	this._shapes.map( (shape) => {
 		shapeList.push(shape);
 	});

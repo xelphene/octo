@@ -683,6 +683,32 @@ function circleFromPoints( a, b, c ) {
 	};
 };
 
+function extractShapesFromObject(obj, onUnknown) {
+	var rv = [];
+	if( typeof(obj)=='object' ) {
+		if( obj instanceof Shape ) {
+			rv.push(obj);
+		} else if( obj instanceof Array ) {
+			obj.map( (x) => {
+				extractShapesFromObject(x,onUnknown).map( (newobj) => {
+					rv.push(newobj);
+				});
+			});
+		} else {
+			Object.keys(obj).map( (k) => {
+				extractShapesFromObject(obj[k],onUnknown).map( (newobj) => {
+					rv.push(newobj);
+				});
+			});
+		}
+	} else {
+		if( onUnknown ) {
+			onUnknown(obj);
+		}
+	}
+	return rv;
+}
+
 
 /////////////////////////////////////////////////////////////
 
@@ -695,3 +721,4 @@ exports.P = P;
 exports.bezier = bezier;
 exports.circleFromPoints = circleFromPoints;
 exports.Shape = Shape;
+exports.extractShapesFromObject = extractShapesFromObject;
