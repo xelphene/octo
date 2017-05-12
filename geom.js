@@ -85,26 +85,26 @@ var Line = function() {
 		
 		if( start instanceof Point ) {
 			this.start = start;
-		} else if( typeof(start)=='object' && start.length==2 ) {
+		} else if( Array.isArray(start) && start.length==2 ) {
 			if( typeof(start[0]) == 'number' && typeof(start[1])=='number' ) {
 				this.start = new Point(start[0], start[1]);
 			} else {
 				throw new Error('if start is an array, it must be an array of two numbers, not '+start);
 			}
 		} else {
-			throw new Error('start must be an instance of Point, not '+start);
+			throw new Error('start must be an instance of Point or an array of two numbers, not '+start);
 		}
 
 		if( end instanceof Point ) {
 			this.end = end;
-		} else if( typeof(end)=='object' && end.length==2 ) {
+		} else if( Array.isArray(end) && end.length==2 ) {
 			if( typeof(end[0]) == 'number' && typeof(end[1])=='number' ) {
 				this.end = new Point(end[0], end[1]);
 			} else {
 				throw new Error('if end is an array, it must be an array of two numbers, not '+end);
 			}
 		} else {
-			throw new Error('end must be an instance of Point, not '+end);
+			throw new Error('end must be an instance of Point or an array of two numbers, not '+end);
 		}
 
 
@@ -119,7 +119,7 @@ var Line = function() {
 		throw new Error('Line() called with incorrect number of arguments');
 	}
 
-	this.comment = null;
+	this.comment = undefined;
 };
 
 function validateLineArg(a) {
@@ -127,31 +127,31 @@ function validateLineArg(a) {
 		throw new Error('Line() called with argument but that argument is not an object.');
 	}
 	
-	['start','end'].map( function(attName) {
-		if( ! a.hasOwnProperty(attName) ) {
+	['start','end'].map( (attName) => {
+		if( ! (attName in a) ) {
 			throw new Error('Line() called with an object as sole parameter and object does not have a "'+attName+'" attribute.');
-		} else if( a[attName] === undefined ) {
-			throw new Error('Line() called with an object as sole parameter and object "'+attName+'" attribute is undefined.');
-		} else if ( a[attName] instanceof Point ) {
-			// given a Point
-		} else if( typeof(a[attName])=='object' && a[attName].length==2 ) {
-			// given an array of two things
-			if( typeof(a[attName][0]) == 'number' && typeof(a[attName][1])=='number' ) {
+		}
+
+		if ( a[attName] instanceof Point ) {
+			// already the right kind of object. nothing to do.		
+		} else if( Array.isArray(a[attName]) ) {
+			// given an array 
+			if( a[attName].length==2 && typeof(a[attName][0]) == 'number' && typeof(a[attName][1])=='number' ) {
 				a[attName] = new Point(
 					a[attName][0],
 					a[attName][1]
 				);
 			} else {
-				throw new Error('Line() called with an object as sole parameter; attribute "'+attName+'" is not an array containing two numbers.');
+				throw new Error('Line() called with an object as sole parameter; attribute "'+attName+'" is an array but it does not contain two numbers; it is '+a[attName]);
 			}
 		} else {
-			throw new Error('Line() called with an object as sole parameter; attribute "'+attName+'" is neither a Point nor an object.');
+			throw new Error('Line() called with an object as sole parameter; attribute "'+attName+'" is neither a Point nor an array; it is '+a[attName]);
 		}
-
 	});
-	
-	return a
-};
+
+	return a;
+}
+
 
 Line.prototype = Object.create(Shape.prototype);
 
@@ -308,6 +308,8 @@ var Bezier = function(start, sctl, ectl, end) {
 	} else {
 		throw new Error('Bezier() called with incorrect number of arguments');
 	}
+
+	this.comment = undefined;
 };
 
 function validateBezierArg(a) {
@@ -317,22 +319,23 @@ function validateBezierArg(a) {
 			
 	// make sure the object has all required parameters
 	['start','sctl','end','ectl'].map( function(attName) {
-		if( a[attName] === undefined ) {
+		if( ! (attName in a) ) {
 			throw new Error('Bezier() called with an object as sole parameter; object does not have a "'+attName+'" attribute.');
-		} else if ( a[attName] instanceof Point ) {
-			// given a Point
-		} else if( typeof(a[attName])=='object' && a[attName].length==2 ) {
-			// given an array of two things
-			if( typeof(a[attName][0]) == 'number' && typeof(a[attName][1])=='number' ) {
+		}
+
+		if( a[attName] instanceof Point ) {
+			// already the right kind of object. nothing to do.
+		} else if( Array.isArray(a[attName]) ) {
+			if( a[attName].length==2 && typeof(a[attName][0]) == 'number' && typeof(a[attName][1])=='number' ) {
 				a[attName] = new Point(
 					a[attName][0],
 					a[attName][1]
 				);
 			} else {
-				throw new Error('Bezier() called with an object as sole parameter; attribute "'+attName+'" is not an array containing two numbers.');
+				throw new Error('Bezier() called with an object as sole parameter; attribute "'+attName+'" is an array but does not contain two numbers; it is '+a[attName]);
 			}
 		} else {
-			throw new Error('Bezier() called with an object as sole parameter; attribute "'+attName+'" is neither a Point nor an object.');
+			throw new Error('Bezier() called with an object as sole parameter; attribute "'+attName+'" is neither a Point nor an array; it is '+a[attName]);
 		}
 	});
 
@@ -516,6 +519,8 @@ var Arc = function() {
 	} else {
 		throw new Error('Arc() called with incorrect number of arguments');
 	}
+	
+	this.comment = undefined;
 };
 
 function validateArcArg(a) {
@@ -526,22 +531,23 @@ function validateArcArg(a) {
 	// make sure the object has valid start,end Point attributes
 	// transform an array of two numbers into a Point if needed.
 	['start','end'].map( function(attName) {
-		if( a[attName] === undefined ) {
+		if( ! (attName in a) ) {
 			throw new Error('Arc() called with an object as sole parameter; object does not have a "'+attName+'" attribute.');
-		} else if ( a[attName] instanceof Point ) {
+		} 
+		
+		if ( a[attName] instanceof Point ) {
 			// given a Point
-		} else if( typeof(a[attName])=='object' && a[attName].length==2 ) {
-			// given an array of two things
-			if( typeof(a[attName][0]) == 'number' && typeof(a[attName][1])=='number' ) {
+		} else if ( Array.isArray(a[attName]) ) {
+			if( a[attName].length==2 && typeof(a[attName][0]) == 'number' && typeof(a[attName][1])=='number' ) {
 				a[attName] = new Point(
 					a[attName][0],
 					a[attName][1]
 				);
 			} else {
-				throw new Error('Arc() called with an object as sole parameter; attribute "'+attName+'" is not an array containing two numbers.');
+				throw new Error('Arc() called with an object as sole parameter; attribute "'+attName+'" is an array but it does not contain two numbers; it is '+a[attName]);
 			}
 		} else {
-			throw new Error('Arc() called with an object as sole parameter; attribute "'+attName+'" is neither a Point nor an object.');
+			throw new Error('Arc() called with an object as sole parameter; attribute "'+attName+'" is neither a Point nor an object; it is '+a[attName]);
 		}
 	});
 	
