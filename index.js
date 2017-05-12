@@ -1,8 +1,8 @@
 
-const geom = require('./geom.js');
+const geom = require('./geom');
 const pattern = require('./pattern.js');
 const pdf = require('./pdf');
-const util = require('./util.js');
+const util = require('./util');
 
 exports.geom = geom;
 exports.pattern = pattern;

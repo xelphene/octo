@@ -1,7 +1,7 @@
 
 PDFDocument = require('pdfkit');
 fs = require('fs');
-const geom = require('./geom.js');
+const geom = require('./geom');
 const Point = geom.Point;
 const testpattern = require('./testpattern.js');
 const Pattern = require('./pattern.js').Pattern;

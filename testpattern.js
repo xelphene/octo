@@ -1,5 +1,5 @@
 
-const geom = require('./geom.js');
+const geom = require('./geom');
 const Pattern = require('./pattern.js').Pattern;
 const Part = require('./pattern.js').Part;
 const Point = geom.Point;

@@ -1,6 +1,6 @@
 
-const geom = require('./geom.js');
-const roundTo = require('./util.js').roundTo;
+const geom = require('./geom');
+const roundTo = require('./util').roundTo;
 
 var Pattern = function () {
 	this.unit = 'inch';
