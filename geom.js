@@ -128,8 +128,10 @@ function validateLineArg(a) {
 	}
 	
 	['start','end'].map( function(attName) {
-		if( a[attName] === undefined ) {
-			throw new Error('Line() called with an object as sole parameter; object does not have a "'+attName+'" attribute.');
+		if( ! a.hasOwnProperty(attName) ) {
+			throw new Error('Line() called with an object as sole parameter and object does not have a "'+attName+'" attribute.');
+		} else if( a[attName] === undefined ) {
+			throw new Error('Line() called with an object as sole parameter and object "'+attName+'" attribute is undefined.');
 		} else if ( a[attName] instanceof Point ) {
 			// given a Point
 		} else if( typeof(a[attName])=='object' && a[attName].length==2 ) {
@@ -152,6 +154,12 @@ function validateLineArg(a) {
 };
 
 Line.prototype = Object.create(Shape.prototype);
+
+Line.prototype.midPoint = function() {
+	var x = (this.start.x + this.end.x)/2;
+	var y = (this.start.y + this.end.y)/2;
+	return new Point(x,y);
+}
 
 Line.prototype.getPointNames = function() {
 	return ['start','end'];
