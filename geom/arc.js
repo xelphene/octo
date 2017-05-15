@@ -1,6 +1,8 @@
 
 const Point = require('./point').Point;
 const Shape = require('./shape').Shape;
+const Line  = require('./line').Line;
+const asin  = require('../util').asin;
 
 var Arc = function() {
 	if( arguments.length == 5 ) {
