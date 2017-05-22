@@ -153,6 +153,13 @@ Bezier.prototype.interval = function(t) {
 	return new Point(x,y);
 }
 
+Bezier.prototype.intervalMap = function(t, f) {
+	for( let i=0; i<=1.0; i+=t ) {
+		let p = this.interval(i);
+		f(p);
+	}
+}
+
 Bezier.prototype.intervalDeriv = function(t) {
 	var x = (
 		3 * Math.pow((1-t),2) * (this.sctl.x-this.start.x) + // 3 * (1-t)^2 * (sctl-start)
