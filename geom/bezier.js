@@ -4,6 +4,7 @@ const Shape = require('./shape').Shape;
 const roundTo = require('../util').roundTo;
 
 var Bezier = function(start, sctl, ectl, end) {
+	Shape.call(this);
 
 	if( arguments.length == 4 ) {
 	

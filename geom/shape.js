@@ -1,5 +1,6 @@
 
 var Shape = function() {
+	this._class = 'default';
 };
 
 Shape.prototype.getExtent = function(axis, direction) {
@@ -22,5 +23,13 @@ Shape.prototype.getExtent = function(axis, direction) {
 	//console.log('END Shape.getExtent');
 	return max*direction;
 };
+
+Shape.prototype.setClass = function(className) {
+	this._class = className;
+}
+
+Shape.prototype.getClass = function() {
+	return this._class;
+}
 
 exports.Shape = Shape;

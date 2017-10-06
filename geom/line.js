@@ -4,6 +4,7 @@ const Point = require('./point').Point;
 const radiansToDegrees = require('../util').radiansToDegrees;
 
 var Line = function() {
+	Shape.call(this);
 
 	if( arguments.length==2 )
 	{
@@ -81,6 +82,14 @@ function validateLineArg(a) {
 
 
 Line.prototype = Object.create(Shape.prototype);
+
+Line.prototype.argumentsToJSON = function() { 
+	return {
+		start: [this.start.x, this.start.y],
+		end:   [this.end.x, this.end.y],
+		comment: this.comment
+	}
+}
 
 Line.prototype.midPoint = function() {
 	var x = (this.start.x + this.end.x)/2;

@@ -5,6 +5,8 @@ const Line  = require('./line').Line;
 const asin  = require('../util').asin;
 
 var Arc = function() {
+	Shape.call(this);
+
 	if( arguments.length == 5 ) {
 		/* constructor call in the traditional manner */
 		
