@@ -2,6 +2,7 @@
 const Point = require('./point').Point;
 const Shape = require('./shape').Shape;
 const roundTo = require('../util').roundTo;
+const Line = require('./line').Line;
 
 var Bezier = function(start, sctl, ectl, end) {
 	Shape.call(this);
@@ -210,7 +211,7 @@ Bezier.prototype.len = function(precision) {
 	 * segments drawn from start to end.  precision is the number of
 	 * segments.  */
 
-	if( precision === null ) {
+	if( precision === undefined ) {
 		precision=10;
 	}
 	var sum=0;
