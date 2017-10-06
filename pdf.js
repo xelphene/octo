@@ -9,14 +9,35 @@ const Part = require('./pattern.js').Part;
 const loadFromYaml = require('./pattern.js').loadFromYaml;
 const format = require('string-template');
 
+function getClassStyle(className) {
+	if( className=='guide' ) {
+		return {
+			strokeOpacity: 0.3
+		}
+	} else {
+		return {
+			strokeOpacity: 1.0
+		};
+	}
+}
+
 function drawLine(doc, line) {
 	var s = line.start;
 	var e = line.end;
 
+	//console.log('lineClass: '+line.getShapeClass());
+	var style = getClassStyle(line.getShapeClass());
+
+	doc.strokeOpacity(style.strokeOpacity);
+	//pdfdoc.dash(5);
+	//pdfdoc.stroke();
+	//pdfdoc.undash();
+
 	doc.moveTo( s.x, s.y );
 	doc.lineTo( e.x, e.y );
 	doc.stroke();
-	
+
+	doc.strokeOpacity(1.0);
 };
 
 function drawBezier(doc, bezier) {

@@ -43,6 +43,12 @@ var Line = function() {
 		
 		this.start = a.start;
 		this.end = a.end;
+		
+		// TODO: shapeClass is broken in general. class setting gets lost somewhere.
+		if( 'shapeClass' in a ) {
+			this.setShapeClass(a.shapeClass);
+		}
+		
 	} else {
 		throw new Error('Line() called with incorrect number of arguments');
 	}
@@ -122,27 +128,30 @@ Line.prototype.isVertical = function() {
 };
 
 Line.prototype.scaleBy = function(s) {
-	return new Line(
-		start = new Point( this.start.x*s, this.start.y*s),
-		end = new Point( this.end.x*s, this.end.y*s)
-	);
+	return new Line({
+		start: new Point( this.start.x*s, this.start.y*s),
+		end: new Point( this.end.x*s, this.end.y*s),
+		shapeClass: this.getShapeClass()
+	});
 };
 
 Line.prototype.xlate = function(dx, dy) {
 	// return a new line identical this one by shifted by dx along the X
 	// axis and dy along the Y axis.
-	return new Line(
-		start = new Point( this.start.x+dx, this.start.y+dy ),
-		end = new Point( this.end.x+dx, this.end.y+dy )
-	);
+	return new Line({
+		start: new Point( this.start.x+dx, this.start.y+dy ),
+		end: new Point( this.end.x+dx, this.end.y+dy ),
+		shapeClass: this.getShapeClass()
+	});
 };
 
 Line.prototype.ymirror = function() {
 	// return a new line identical to this one but mirrored about the Y axis
-	return new Line(
-		new Point( -this.start.x, this.start.y),
-		new Point( -this.end.x,   this.end.y)
-	);
+	return new Line({
+		start: new Point( -this.start.x, this.start.y),
+		end: new Point( -this.end.x,   this.end.y),
+		shapeClass: this.getShapeClass()
+	});
 };
 
 Line.prototype.yint = function() {
@@ -169,10 +178,11 @@ Line.prototype.xlateAngular = function(a, d) {
 	 * negative.
 	 */
 	
-	return new Line(
-		this.start.xlateAngular(a, d),
-		this.end.xlateAngular(a, d)
-	);
+	return new Line({
+		start: this.start.xlateAngular(a, d),
+		end: this.end.xlateAngular(a, d),
+		shapeClass: this.getShapeClass()
+	});
 };
 
 Line.prototype.getParallel = function(d) { 
