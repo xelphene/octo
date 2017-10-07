@@ -3,6 +3,8 @@ const Point = require('./point').Point;
 const Shape = require('./shape').Shape;
 const Line  = require('./line').Line;
 const asin  = require('../util').asin;
+const sin  = require('../util').sin;
+const cos  = require('../util').cos;
 
 var Arc = function() {
 	Shape.call(this);
@@ -108,10 +110,12 @@ function validateArcArg(a) {
 
 Arc.prototype = Object.create(Shape.prototype);
 
+/*
 Arc.prototype.center = function() {
 	// TODO: make this computed in the future
 	return this.preComputedCenter;
 };
+*/
 
 Arc.prototype.getPointNames = function() {
 	return ['start','end'];
@@ -185,6 +189,15 @@ Arc.prototype.chord = function() {
 }
 
 Arc.prototype.angle = function() {
+	/* TODO: is wrong for:
+	new Arc({  
+	    start: P( -1, -1 ), end:   P( 1, 0 ), 
+	    radius: 1,     
+	    large: false,  
+	    clockwise: true
+	});
+	probably because it assumes an origin center
+	*/
 	if( this.large==false ) {
 		return 2*asin( 
 			(this.chord().len()/this.radius)  /
@@ -198,9 +211,45 @@ Arc.prototype.angle = function() {
 	}
 }
 
+Arc.prototype.center = function() {
+	if( this.clockwise ) {
+		var e = -1;
+	} else {
+		var e = 1;
+	}
+	
+	// length of the chord line
+	var d = Math.sqrt(
+		Math.pow(this.end.x-this.start.x, 2) + 
+		Math.pow(this.end.y-this.start.y, 2)
+	);
+
+	var u = (this.end.x-this.start.x)/d;
+	var v = (this.end.y-this.start.y)/d;
+	
+	var h = Math.sqrt(
+		Math.pow(this.radius,2) - Math.pow(d,2)/4
+	);
+
+	var cx = (this.start.x + this.end.x)/2 - (e*h*v);
+	var cy = (this.start.y + this.end.y)/2 + (e*h*u);
+	
+	return new Point(cx, cy);
+}
+
 Arc.prototype.len = function() {
 	var c = this.radius*Math.PI*2;
 	return c * (this.angle()/360);
+}
+
+Arc.prototype.midPoint = function() {
+	// sin(chord.xangle()) = x / this.radius
+	// TODO: wrong for non-origin centered arcs
+	var xangle = this.chord().xangle();
+	var x = this.radius * sin(xangle);
+	var y = this.radius * cos(xangle);
+	
+	return new Point(x,y);
 }
 
 exports.Arc = Arc;
