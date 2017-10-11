@@ -53,6 +53,11 @@ var Arc = function() {
 	} else {
 		throw new Error('Arc() called with incorrect number of arguments');
 	}
+
+	if( this.radius < this.chord().len()/2 ) {
+		process.emitWarning('An Arc cannot have a specified radius ('+this.radius+') of less than half the chord line length ('+(this.chord().len()/2)+'). Radius will be set to half the chord line length instead.');
+		this.radius = this.chord().len()/2;
+	}
 	
 	this.comment = undefined;
 };
@@ -189,15 +194,6 @@ Arc.prototype.chord = function() {
 }
 
 Arc.prototype.angle = function() {
-	/* TODO: is wrong for:
-	new Arc({  
-	    start: P( -1, -1 ), end:   P( 1, 0 ), 
-	    radius: 1,     
-	    large: false,  
-	    clockwise: true
-	});
-	probably because it assumes an origin center
-	*/
 	if( this.large==false ) {
 		return 2*asin( 
 			(this.chord().len()/this.radius)  /
@@ -212,21 +208,32 @@ Arc.prototype.angle = function() {
 }
 
 Arc.prototype.center = function() {
-	if( this.clockwise ) {
-		var e = -1;
+	if( ! this.large ) {
+		if( this.clockwise ) {
+			var e = -1;
+		} else {
+			var e = 1;
+		}
 	} else {
-		var e = 1;
+		if( this.clockwise ) {
+			var e = 1;
+		} else {
+			var e = -1;
+		}
 	}
 	
 	// length of the chord line
+	var d = this.chord().len();
+	/*
 	var d = Math.sqrt(
 		Math.pow(this.end.x-this.start.x, 2) + 
 		Math.pow(this.end.y-this.start.y, 2)
 	);
+	*/
 
 	var u = (this.end.x-this.start.x)/d;
 	var v = (this.end.y-this.start.y)/d;
-	
+
 	var h = Math.sqrt(
 		Math.pow(this.radius,2) - Math.pow(d,2)/4
 	);
@@ -242,14 +249,81 @@ Arc.prototype.len = function() {
 	return c * (this.angle()/360);
 }
 
+Arc.prototype.originCenteredArc = function() {
+	var start = new Point(
+		this.start.x - this.center().x,
+		this.start.y - this.center().y
+	);
+	var end = new Point(
+		this.end.x - this.center().x,
+		this.end.y - this.center().y
+	);
+	return new Arc({
+		start: start,
+		end: end,
+		radius: this.radius,
+		large: this.large,
+		clockwise: this.clockwise
+	});
+}
+
+Arc.prototype.isOriginCentered = function() {
+	if( Math.abs(this.center().x) > 0.0001 ) {
+		return false;
+	}
+	if( Math.abs(this.center().y) > 0.0001 ) {
+		return false;
+	}
+	return true;
+}
+
 Arc.prototype.midPoint = function() {
-	// sin(chord.xangle()) = x / this.radius
-	// TODO: wrong for non-origin centered arcs
-	var xangle = this.chord().xangle();
-	var x = this.radius * sin(xangle);
-	var y = this.radius * cos(xangle);
+
+	if( ! this.isOriginCentered() ) { 
+		var ca = this.originCenteredArc();
+		camp = ca.midPoint();
+		return new Point(
+			this.center().x + camp.x,
+			this.center().y + camp.y
+		);
+	}
+
+	var rl = new Line(
+		this.center(),
+		this.chord().midPoint()
+	);
+
+	var xa = rl.xangle();
+	xa = Math.abs(xa);	
+
+	// sin(xa) = dy / radius
+	var dy = this.radius * sin(xa);
 	
-	return new Point(x,y);
+	// cos(xa) = dx / radius
+	var dx = this.radius * cos(xa);
+
+	var ax = (this.start.x + this.end.x)/2;
+	var ay = (this.start.y + this.end.y)/2;
+
+	if( ax <  0 ) { var dxf = -1 }
+	if( ax >  0 ) { var dxf = 1  }
+	if( ax == 0 ) { var dxf = 0  }
+	if( ay < 0  ) { var dyf = -1 }
+	if( ay > 0  ) { var dyf = 1  }
+	if( ay == 0 ) { var dyf = 0  }
+
+	if( this.large ) {
+		dxf *= -1;
+		dyf *= -1;
+	}
+
+	dx*=dxf;
+	dy*=dyf;
+	
+	return new Point(
+		this.center().x+dx,
+		this.center().y+dy
+	);
 }
 
 exports.Arc = Arc;
