@@ -202,4 +202,28 @@ Line.prototype.getParallel = function(d) {
 	return this.xlateAngular(this.xangle()+90, d);
 };
 
+Line.prototype.walk = function(distance, backwards) {
+	var numPoints = Math.floor(this.len()/distance);
+	var points = [];
+	
+	if( ! backwards ) {
+		points.push(this.start);
+		var xOffset = ( this.end.x-this.start.x ) / ( this.len()/distance );
+		var yOffset = ( this.end.y-this.start.y ) / ( this.len()/distance );
+	} else {
+		points.push(this.end);
+		var xOffset = ( this.start.x-this.end.x ) / ( this.len()/distance );
+		var yOffset = ( this.start.y-this.end.y ) / ( this.len()/distance );
+	}
+
+	for( var i=1; i<=numPoints; i++ ) {
+		let last = points[points.length-1];
+		points.push( new Point(
+			last.x + xOffset,
+			last.y + yOffset
+		));
+	}
+	return points;
+}
+
 exports.Line = Line;
