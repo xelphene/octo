@@ -156,9 +156,11 @@ Bezier.prototype.interval = function(t) {
 }
 
 Bezier.prototype.intervalMap = function(t, f) {
+	var count=0;
 	for( let i=0; i<=1.0; i+=t ) {
 		let p = this.interval(i);
-		f(p);
+		f(p,i,count);
+		count+=1;
 	}
 }
 
