@@ -14,6 +14,14 @@ function getClassStyle(className) {
 		return {
 			strokeOpacity: 0.3
 		}
+	} else if( className=='align' ) {
+		return {
+			strokeOpacity: 0.5
+		}
+	} else if( className=='medium' ) {
+		return {
+			strokeOpacity: 0.7
+		}
 	} else {
 		return {
 			strokeOpacity: 1.0
@@ -25,7 +33,6 @@ function drawLine(doc, line) {
 	var s = line.start;
 	var e = line.end;
 
-	//console.log('lineClass: '+line.getShapeClass());
 	var style = getClassStyle(line.getShapeClass());
 
 	doc.strokeOpacity(style.strokeOpacity);
@@ -41,6 +48,10 @@ function drawLine(doc, line) {
 };
 
 function drawBezier(doc, bezier) {
+	var style = getClassStyle(bezier.getShapeClass());
+
+	doc.strokeOpacity(style.strokeOpacity);
+	
 	doc.moveTo( bezier.start.x, bezier.start.y );
 	doc.bezierCurveTo(
 		bezier.sctl.x, bezier.sctl.y,
@@ -49,9 +60,12 @@ function drawBezier(doc, bezier) {
 	);
 	doc.stroke();
 
+	doc.strokeOpacity(1.0);
 };
 
 function drawArc(doc, arc) {
+	var style = getClassStyle(arc.getShapeClass());
+
 	var path = format("M {startX},{startY} A{radiusX},{radiusY} {xAxisRotation} {largeArc},{antiClockwise} {endX},{endY}", {
 		startX: arc.start.x, startY: arc.start.y,
 		radiusX: arc.radius, radiusY: arc.radius,
@@ -60,13 +74,16 @@ function drawArc(doc, arc) {
 		antiClockwise: arc.clockwise ? '1' : '0',
 		xAxisRotation: 0
 	});
+
+	doc.strokeOpacity(style.strokeOpacity);
 	
 	doc.path(path);
 	doc.stroke();
+
+	doc.strokeOpacity(1.0);
 };
 
 function drawShape(doc, shape) {
-	//console.log('drawShape: '+shape.toString());
 	if( shape instanceof geom.Bezier ) {
 		drawBezier(doc, shape );
 	} else if ( shape instanceof geom.Line ) {
@@ -97,32 +114,13 @@ function makexformShape(unit) {
 			p.x * M,
 			-(p.y * M)
 		);
-	};
+	}
+	var xformLength = function(l) {
+		return l*M;
+	}
 	
 	return function (shape) {
-		if( shape instanceof geom.Line ) {
-			return new geom.Line(
-				xformPoint(shape.start),
-				xformPoint(shape.end)
-			);
-		} else if( shape instanceof geom.Bezier ) {
-			return new geom.Bezier(
-				xformPoint(shape.start),
-				xformPoint(shape.sctl),
-				xformPoint(shape.ectl),
-				xformPoint(shape.end)
-			);
-		} else if( shape instanceof geom.Arc ) {
-			return new geom.Arc(
-				xformPoint(shape.start),
-				xformPoint(shape.end),
-				shape.radius * M,
-				shape.large,
-				shape.clockwise
-			);
-		} else {
-			throw new Error('dont know how to transform '+shape);
-		};
+		return shape.xlatef(xformPoint, xformLength);
 	};
 };
 
@@ -555,6 +553,10 @@ PageOptions.prototype.getMaxY = function() {
 }
 
 function genpdf(pattern, outfn, pageOptions) {
+	if( ! (pattern instanceof Pattern) ) {
+		throw new Error('pattern parameter is not a Pattern object');
+	}
+
 	if( pageOptions==null ) {
 		pageOptions = new PageOptions();
 	}
