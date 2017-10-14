@@ -5,7 +5,7 @@ const roundTo = require('../util').roundTo;
 const Line = require('./line').Line;
 
 var Bezier = function(start, sctl, ectl, end) {
-	Shape.call(this);
+	Shape.apply(this, arguments);
 
 	if( arguments.length == 4 ) {
 	
@@ -93,7 +93,8 @@ Bezier.prototype.ymirror = function() {
 		start: new Point( -this.start.x, this.start.y),
 		sctl:  new Point( -this.sctl.x, this.sctl.y ),
 		end:   new Point( -this.end.x,   this.end.y),
-		ectl:  new Point( -this.ectl.x, this.ectl.y )
+		ectl:  new Point( -this.ectl.x, this.ectl.y ),
+		shapeClass: this.getShapeClass()
 	})
 };
 
@@ -107,22 +108,39 @@ Bezier.prototype.toString = function() {
 }
 
 Bezier.prototype.scaleBy = function(s) {
-	return new Bezier(
-		start = new Point( this.start.x*s, this.start.y*s ),
-		sctl = new Point( this.sctl.x*s, this.sctl.y*s ),
-		ectl = new Point( this.ectl.x*s, this.ectl.y*s ),
-		end = new Point( this.end.x*s, this.end.y*s )
-	);
+	return new Bezier({
+		start: new Point( this.start.x*s, this.start.y*s ),
+		sctl: new Point( this.sctl.x*s, this.sctl.y*s ),
+		ectl: new Point( this.ectl.x*s, this.ectl.y*s ),
+		end: new Point( this.end.x*s, this.end.y*s ),
+		shapeClass: this.getShapeClass()
+	});
 };
 
 Bezier.prototype.xlate = function(dx, dy) {
-	return new Bezier(
-		start = new Point( this.start.x+dx, this.start.y+dy ),
-		sctl = new Point( this.sctl.x+dx, this.sctl.y+dy ),
-		ectl = new Point( this.ectl.x+dx, this.ectl.y+dy ),
-		end =  new Point( this.end.x+dx, this.end.y+dy )
-	);
+	return new Bezier({
+		start: new Point( this.start.x+dx, this.start.y+dy ),
+		sctl: new Point( this.sctl.x+dx, this.sctl.y+dy ),
+		ectl: new Point( this.ectl.x+dx, this.ectl.y+dy ),
+		end:  new Point( this.end.x+dx, this.end.y+dy ),
+		shapeClass: this.getShapeClass()
+	});
 };
+
+Bezier.prototype.xlatef = function(xlatePoint, xlateLength) {
+	/* f is a function which takes a Point and returns a Point.
+	 * f will typically move all Points comprising this Shape in
+	 * the same manner.
+	 */
+	return new Bezier({
+		start: xlatePoint(this.start),
+		sctl: xlatePoint(this.sctl),
+		ectl: xlatePoint(this.ectl),
+		end:  xlatePoint(this.end),
+		shapeClass: this.getShapeClass()
+	});
+};
+
 
 Bezier.prototype.xlateAngular = function(a, d) {
 	/* return a Bezier similar to this one but is shifted by distance d in
@@ -131,12 +149,13 @@ Bezier.prototype.xlateAngular = function(a, d) {
 	 * negative.
 	 */
 	
-	return new Bezier(
-		this.start.xlateAngular(a, d),
-		this.sctl.xlateAngular(a, d),
-		this.ectl.xlateAngular(a, d),
-		this.end.xlateAngular(a, d)
-	);
+	return new Bezier({
+		start: this.start.xlateAngular(a, d),
+		sctl: this.sctl.xlateAngular(a, d),
+		ectl: this.ectl.xlateAngular(a, d),
+		end: this.end.xlateAngular(a, d),
+		shapeClass: this.getShapeClass()
+	});
 };
 
 Bezier.prototype.interval = function(t) {

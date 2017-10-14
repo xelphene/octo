@@ -1,6 +1,16 @@
 
 var Shape = function() {
 	this._shapeClass = 'default';
+	this.comment = '';
+
+	if( arguments.length==1 ) {
+		if( 'shapeClass' in arguments[0] ) {
+			this._shapeClass = arguments[0].shapeClass;
+		}
+		if( 'comment' in arguments[0] ) {
+			this.comment = arguments[0].comment;
+		}
+	}
 };
 
 Shape.prototype.getExtent = function(axis, direction) {

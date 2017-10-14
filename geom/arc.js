@@ -7,7 +7,7 @@ const sin  = require('../util').sin;
 const cos  = require('../util').cos;
 
 var Arc = function() {
-	Shape.call(this);
+	Shape.apply(this, arguments);
 
 	if( arguments.length == 5 ) {
 		/* constructor call in the traditional manner */
@@ -130,13 +130,14 @@ Arc.prototype.getPointNames = function() {
 // usually
 
 Arc.prototype.ymirror = function() {
-	return new Arc(
-		new Point(-this.start.x, this.start.y),
-		new Point(-this.end.x, this.end.y),
-		this.radius,
-		this.large,
-		! this.clockwise
-	);
+	return new Arc({
+		start: new Point(-this.start.x, this.start.y),
+		end: new Point(-this.end.x, this.end.y),
+		radius: this.radius,
+		large: this.large,
+		clockwise: ! this.clockwise,
+		shapeClass: this.getShapeClass()
+	});
 };
 
 Arc.prototype.toString = function() {
@@ -150,33 +151,47 @@ Arc.prototype.toString = function() {
 };
 
 Arc.prototype.xlate = function(dx, dy) {
-	return new Arc(
-		start = new Point( this.start.x+dx, this.start.y+dy),
-		end = new Point( this.end.x+dx, this.end.y+dy),
-		radius = this.radius,
-		large = this.large,
-		clockwise = this.clockwise
-	);
+	return new Arc({
+		start: new Point( this.start.x+dx, this.start.y+dy),
+		end: new Point( this.end.x+dx, this.end.y+dy),
+		radius: this.radius,
+		large: this.large,
+		clockwise: this.clockwise,
+		shapeClass: this.getShapeClass()
+	});
+}
+
+Arc.prototype.xlatef = function(xlatePoint, xlateLength) {
+	return new Arc({
+		start: xlatePoint(this.start),
+		end: xlatePoint(this.end),
+		radius: xlateLength(this.radius),
+		large: this.large,
+		clockwise: this.clockwise,
+		shapeClass: this.getShapeClass()
+	});
 }
 
 Arc.prototype.scaleBy = function(s) {
-	return new Arc(
-		start = new Point( this.start.x*s, this.start.y*s ),
-		end = new Point( this.end.x*s, this.end.y*s ),
-		radius = this.radius * s,
-		large = this.large,
-		clockwise = this.clockwise
-	);
+	return new Arc({
+		start: new Point( this.start.x*s, this.start.y*s ),
+		end: new Point( this.end.x*s, this.end.y*s ),
+		radius: this.radius * s,
+		large: this.large,
+		clockwise: this.clockwise,
+		shapeClass: this.getShapeClass()
+	});
 }
 
 Arc.prototype.xlateAngular = function(a, d) {
-	return new Arc(
-		start  = this.start.xlateAngular(a,d),
-		end    = this.end.xlateAngular(a,d),
-		radius = this.radius,
-		large  = this.large,
-		clockwise = this.clockwise
-	);
+	return new Arc({
+		start: this.start.xlateAngular(a,d),
+		end: this.end.xlateAngular(a,d),
+		radius: this.radius,
+		large: this.large,
+		clockwise: this.clockwise,
+		shapeClass: this.getShapeClass()
+	});
 }
 
 Arc.prototype.getParallel = function(d) {
@@ -263,7 +278,8 @@ Arc.prototype.originCenteredArc = function() {
 		end: end,
 		radius: this.radius,
 		large: this.large,
-		clockwise: this.clockwise
+		clockwise: this.clockwise,
+		shapeClass: this.getShapeClass()
 	});
 }
 

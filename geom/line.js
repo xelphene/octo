@@ -4,7 +4,7 @@ const Point = require('./point').Point;
 const radiansToDegrees = require('../util').radiansToDegrees;
 
 var Line = function() {
-	Shape.call(this);
+	Shape.apply(this, arguments);
 
 	if( arguments.length==2 )
 	{
@@ -44,16 +44,9 @@ var Line = function() {
 		this.start = a.start;
 		this.end = a.end;
 		
-		// TODO: shapeClass is broken in general. class setting gets lost somewhere.
-		if( 'shapeClass' in a ) {
-			this.setShapeClass(a.shapeClass);
-		}
-		
 	} else {
 		throw new Error('Line() called with incorrect number of arguments');
 	}
-
-	this.comment = undefined;
 };
 
 function validateLineArg(a) {
@@ -144,6 +137,18 @@ Line.prototype.xlate = function(dx, dy) {
 		shapeClass: this.getShapeClass()
 	});
 };
+
+Line.prototype.xlatef = function(xlatePoint, xlateLength) {
+	/* f is a function which takes a Point and returns a Point.
+	 * f will typically move all Points comprising this Shape in
+	 * the same manner.
+	 */
+	return new Line({
+		start: xlatePoint(this.start),
+		end: xlatePoint(this.end),
+		shapeClass: this.getShapeClass()
+	});
+}
 
 Line.prototype.ymirror = function() {
 	// return a new line identical to this one but mirrored about the Y axis
