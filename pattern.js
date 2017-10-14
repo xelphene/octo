@@ -1,6 +1,7 @@
 
 const geom = require('./geom');
 const roundTo = require('./util').roundTo;
+const Shape = geom.Shape;
 
 var Pattern = function () {
 	this.unit = 'inch';
@@ -80,8 +81,7 @@ Part.prototype.getShapeNames = function() {
 }
 
 Part.prototype.addShape = function(shape) {
-	isShape = (shape instanceof geom.Bezier) || (shape instanceof geom.Line) || (shape instanceof geom.Arc);
-	if( ! isShape ) {
+	if( ! (shape instanceof Shape) ) {
 		throw new Error('shape required for Part.addShape(), not '+shape);
 	}
 	this._shapes.push(shape);
