@@ -16,7 +16,7 @@ function getClassStyle(className) {
 		}
 	} else if( className=='align' ) {
 		return {
-			strokeOpacity: 0.5
+			strokeOpacity: 0.3
 		}
 	} else if( className=='medium' ) {
 		return {
@@ -83,6 +83,17 @@ function drawArc(doc, arc) {
 	doc.strokeOpacity(1.0);
 };
 
+function drawCircle(doc, circle) {
+	var style = getClassStyle(circle.getShapeClass());
+	doc.strokeOpacity(style.strokeOpacity);
+	
+	doc.strokeOpacity(style.strokeOpacity);
+	doc.circle(circle.center.x, circle.center.y, circle.radius);
+	doc.stroke();
+	
+	doc.strokeOpacity(1.0);
+}
+
 function drawShape(doc, shape) {
 	if( shape instanceof geom.Bezier ) {
 		drawBezier(doc, shape );
@@ -90,14 +101,16 @@ function drawShape(doc, shape) {
 		drawLine(doc, shape);
 	} else if( shape instanceof geom.Arc ) {
 		drawArc(doc, shape);
-	} else {
+	} else if( shape instanceof geom.Circle ) {
+		drawCircle(doc, shape);
+	}  else {
 		throw new Error('shape is an unknown type of object: '+shape);
 	}
 };
 
 // //////////////////////////////////////////////////////
 
-// return a function which will transform a shape (Line, Bezier) from
+// return a function which will transform a Shape from
 // pattern coordinates to PDFKit coordinates.  pattern coordinates are some
 // physical unit (inches, mm) and Y+ is upward.  PDFkit coordinates are
 // points (1/72 inch) and Y+ is downward.

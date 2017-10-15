@@ -4,6 +4,7 @@ const Bezier = require('./bezier').Bezier;
 const Shape = require('./shape').Shape;
 const Point = require('./point').Point;
 const Line = require('./line').Line;
+const Circle = require('./circle').Circle;
 
 function bezier(params) {
 	console.warn('octo.geom.bezier is deprecated');
@@ -77,3 +78,4 @@ exports.bezier = bezier;
 exports.circleFromPoints = circleFromPoints;
 exports.Shape = Shape;
 exports.extractShapesFromObject = extractShapesFromObject;
+exports.Circle = Circle;
