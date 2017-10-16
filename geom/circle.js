@@ -41,35 +41,40 @@ Circle.prototype.getPointNames = function() {
 Circle.prototype.scaleBy = function(s) {
 	return new Circle({
 		center: [this.center.x*s, this.center.y*s],
-		radius: this.radius*s
+		radius: this.radius*s,
+		shapeClass: this.getShapeClass()
 	});
 }
 
 Circle.prototype.xlate = function(dx, dy) {
 	return new Circle({
 		center: [this.center.x+dx, this.center.y+dy],
-		radius: this.radius
+		radius: this.radius,
+		shapeClass: this.getShapeClass()
 	});
 }
 
 Circle.prototype.xlatef = function(xlatePoint, xlateLength) {
 	return new Circle({
 		center: xlatePoint(this.center),
-		radius: xlateLength(this.radius)
+		radius: xlateLength(this.radius),
+		shapeClass: this.getShapeClass()
 	});
 }
 
 Circle.prototype.ymirror = function() {
 	return new Circle({
 		center: [-this.center.x, this.center.y],
-		radius: this.radius
+		radius: this.radius,
+		shapeClass: this.getShapeClass()
 	});
 }
 
 Circle.prototype.xlateAngular = function(a, d) {
 	return new Circle({
 		center: this.center.xlateAngular(a,d),
-		radius: this.radius
+		radius: this.radius,
+		shapeClass: this.getShapeClass()
 	});
 }
 

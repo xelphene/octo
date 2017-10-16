@@ -86,8 +86,9 @@ function drawArc(doc, arc) {
 function drawCircle(doc, circle) {
 	var style = getClassStyle(circle.getShapeClass());
 	doc.strokeOpacity(style.strokeOpacity);
+
+	console.log('circle shapeClass: '+circle.getShapeClass());
 	
-	doc.strokeOpacity(style.strokeOpacity);
 	doc.circle(circle.center.x, circle.center.y, circle.radius);
 	doc.stroke();
 	
