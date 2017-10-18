@@ -177,8 +177,92 @@ Bezier.prototype.interval = function(t) {
 Bezier.prototype.intervalMap = function(t, f) {
 	var count=0;
 	for( let i=0; i<=1.0; i+=t ) {
-		let p = this.interval(i);
-		f(p,i,count);
+		let thisPoint = this.interval(i);
+		f(thisPoint, i, count);
+		count+=1;
+	}
+}
+
+Bezier.prototype.intervalMapAdv = function(t, f) {
+	var count=0;
+	for( let i=0; i<=1.0; i+=t ) {
+		let thisPoint = this.interval(i);
+
+		/////////////////////////////////////////////////////////
+		// estimate the slope of the tangent line at this point
+		////////////////////////////////////////////////////////
+
+		if( i==0 ) {
+			/* we're at the start point. estimate slope based on the line 
+			 * from start to sctl */
+			var priorPoint = this.start;
+			var nextPoint = this.sctl;
+		} else if( i+t >= 1.0 ) {
+			/* we're at the final point. estimate slope based on line from 
+			 * ectl to end */
+			var priorPoint = this.ectl;
+			var nextPoint = this.end;
+		} else {
+			/* we're somewhere in the middle. estimate slope based on 
+			 * line from last pound found by interval to the next */
+			var priorPoint = this.interval(i-t);
+			var nextPoint = this.interval(i+t);
+		}
+		var slope = new Line(priorPoint, nextPoint).slope();
+
+
+		///////////////////////////////////////////////////////
+		// make a function which returns a point somewhere on
+		// the estimated tangent line to this point (distance
+		// d from this point)
+		///////////////////////////////////////////////////////
+
+		let getTanPoint = function(distance) {
+			if( slope==Infinity ) {
+				// tangent line is vertical
+				return new Point(thisPoint.x, thisPoint.y+distance);
+			} else {
+				let r = Math.sqrt(1+Math.pow(slope,2));
+				let x = thisPoint.x + distance/r;
+				let y = thisPoint.y + (distance*slope)/r;
+				return new Point(x,y);
+			}
+		}
+
+		///////////////////////////////////////////////////////
+		// make a function which returns a point somewhere on
+		// the line tangent to the estimated tangent line to 
+		// this point (distance d from this point)
+		///////////////////////////////////////////////////////
+		
+		let getPerpTanPoint = function(distance) {
+			if( slope==Infinity ) {
+				// tangent line is vertical
+				return new Point(thisPoint.x+distance, thisPoint.y);
+			} else {
+				let perpSlope = -1/slope;
+				if( perpSlope>0 ) {
+					distance=-distance;
+				}
+				let r = Math.sqrt(1+Math.pow(perpSlope,2));
+				let x = thisPoint.x + distance/r;
+				let y = thisPoint.y + (distance*perpSlope)/r;
+				return new Point(x,y);
+			}
+		}
+
+		//////////////////////////////////////////////////////
+		// call the caller's callback function for this point
+		//////////////////////////////////////////////////////
+
+		f({
+			point: thisPoint,
+			interval: i,
+			count: count,
+			slope: slope,
+			getTanPoint: getTanPoint,
+			getPerpTanPoint: getPerpTanPoint
+		});
 		count+=1;
 	}
 }
