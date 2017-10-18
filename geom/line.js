@@ -1,6 +1,7 @@
 
 const Shape = require('./shape').Shape;
 const Point = require('./point').Point;
+const UnitVector = require('./unitvector').UnitVector;
 const radiansToDegrees = require('../util').radiansToDegrees;
 
 var Line = function() {
@@ -229,6 +230,12 @@ Line.prototype.walk = function(distance, backwards) {
 		));
 	}
 	return points;
+}
+
+Line.prototype.toUnitVector = function() {
+	var x = this.end.x-this.start.x;
+	var y = this.end.y-this.start.y;
+	return new UnitVector( x/this.len(), y/this.len() );
 }
 
 exports.Line = Line;

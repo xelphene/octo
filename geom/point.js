@@ -34,6 +34,15 @@ Point.prototype.xlateAngular = function(a, d) {
 	return new Point( this.x+w, this.y+h );
 };
 
+Point.prototype.xlateUnitVector = function(v, d) {
+
+	/* return a new point in the direction pointed to by the UnitVector v
+	 * and distance d far away.
+	 */
+	 
+	return new Point( this.x + d*v.x, this.y + d*v.y );
+}
+
 Point.prototype.ymirror = function() {
 	return new Point( -this.x, this.y );
 };
