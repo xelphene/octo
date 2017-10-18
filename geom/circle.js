@@ -78,9 +78,12 @@ Circle.prototype.xlateAngular = function(a, d) {
 	});
 }
 
-/* TODO: not right */
 Circle.prototype.getExtent = function(axis, direction) {
-	return this.radius*direction;
+	if( axis=='x' ) {
+		return this.center.x + direction*this.radius;
+	} else {
+		return this.center.y + direction*this.radius;
+	}
 }
 
 exports.Circle = Circle;
