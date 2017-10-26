@@ -44,6 +44,9 @@ function asin(x) {
 }
 
 function roundTo( value, precision ) {
+	if( precision===undefined ) {
+		precision=3;
+	}
 	var m = Math.pow(10,precision);
 	return Math.round(value*m)/m;
 }
@@ -174,6 +177,11 @@ function debugComputeConicalSurface(f, cs) {
 	});
 }
 
+function isNegative(n) {
+	return ((n = +n) || 1 / n) < 0;
+}
+
+exports.isNegative = isNegative;
 exports.roundTo = roundTo;
 exports.cos = cos;
 exports.sin = sin;
