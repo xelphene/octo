@@ -5,6 +5,7 @@ const Line  = require('./line').Line;
 const asin  = require('../util').asin;
 const sin  = require('../util').sin;
 const cos  = require('../util').cos;
+const isNegative = require('../util').isNegative;
 
 var Arc = function() {
 	Shape.apply(this, arguments);
@@ -293,6 +294,30 @@ Arc.prototype.isOriginCentered = function() {
 	return true;
 }
 
+Arc.prototype.isUnitArc = function()
+{
+	return (
+		this.radius==1 &&
+		this.center().x < 0.00001 &&
+		this.center().y < 0.00001
+	);
+	
+	return this.radius==1 && this.center().x==0 && this.center().y==0;
+}
+
+Arc.prototype.unitArc = function()
+{
+	return this.originCenteredArc().scaleBy(1/this.radius);
+}
+
+Arc.prototype.xlateFromUnitArc = function(p)
+{
+	return new Point(
+		p.x*this.radius + this.center().x,
+		p.y*this.radius + this.center().y
+	);	
+}
+
 Arc.prototype.midPoint = function() {
 
 	if( ! this.isOriginCentered() ) { 
@@ -340,6 +365,77 @@ Arc.prototype.midPoint = function() {
 		this.center().x+dx,
 		this.center().y+dy
 	);
+}
+
+
+Arc.prototype.reverse = function() {
+	return new Arc({
+		start: this.end,
+		end: this.start,
+		radius: this.radius,
+		large: this.large,
+		clockwise: ! this.clockwise
+	});
+}
+
+Arc.prototype.walkSingle = function(distance, forwards)
+{
+	if( forwards===undefined ) { forwards=true; }
+	
+	if( ! this.isUnitArc() ) {
+		var p = this.unitArc().walkSingle( distance*(1/this.radius), forwards );
+		return this.xlateFromUnitArc(p);
+	}
+	
+	if( ! forwards ) {
+		return this.reverse().walkSingle(distance, true);
+	}
+
+	/* at this point, we're working with a unit arc (radius 1, center 0,0)
+	 * and going in the forward direction only (start @start, go distance
+	 * toward end) */
+	
+	var startPoint = this.start;
+
+	// get the angle of a line from center to start point in radians
+	var startAngle;	
+	if( startPoint.x >= 0 && startPoint.y >= 0 ) {
+		// quad 1. up right + +
+		startAngle = Math.acos(startPoint.x);
+	} else if( startPoint.x < 0 && startPoint.y >=0 ) {
+		// quad 2. up left - +
+		startAngle = Math.acos(startPoint.x);
+	} else if( startPoint.x >= 0 && startPoint.y<0 ) {
+		// quad 4. down right + -
+		startAngle = Math.acos( - Math.abs(startPoint.x) ) + Math.PI;
+	} else {
+		// quad 3. down left - -
+		startAngle = Math.acos(Math.abs(startPoint.x)) + Math.PI;
+	} 
+	
+	/* finding the point a certain distance from the start point is simply a
+	 * matter of adding the distance to the angle as measured in radians */
+	if( this.clockwise ) {
+		var x = Math.cos( startAngle - distance );
+		var y = Math.sin( startAngle - distance );
+	} else {
+		var x = Math.cos(startAngle + distance );
+		var y = Math.sin(startAngle + distance);
+	}
+	
+	return new Point(x,y);
+}
+
+Arc.prototype.walk = function(distance, backwards) 
+{
+	var points = [];
+	var numPoints = Math.floor(this.len() / distance)+1;
+	
+	while( points.length < numPoints ) {
+		points.push( this.walkSingle(distance*points.length) );
+	}
+
+	return points;
 }
 
 exports.Arc = Arc;
