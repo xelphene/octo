@@ -37,6 +37,10 @@ Pattern.prototype.log = function(f) {
 	});
 };
 
+Pattern.prototype.getParts = function() {
+	return this.parts;
+}
+
 Pattern.prototype.newPart = function() {
 	var p = new Part();
 	this.parts.push(p);
