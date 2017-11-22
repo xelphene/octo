@@ -438,4 +438,37 @@ Arc.prototype.walk = function(distance, backwards)
 	return points;
 }
 
+Arc.prototype.walkf = function(distance, func)
+{
+	var pointCount=0;
+	var numPoints = Math.floor(this.len() / distance)+1;
+	
+	while( pointCount < numPoints ) 
+	{
+		pointCount+=1;
+		
+		let curPoint = this.walkSingle(distance*(pointCount-1))
+		
+		let radiusLine = new Line(
+			this.center(),
+			curPoint
+		);
+		
+		let getPerpTanPoint = function(distance) {
+			return curPoint.xlateUnitVector(
+				radiusLine.toUnitVector(),
+				distance
+			)
+		}
+		
+		func({
+			point: curPoint,
+			count: pointCount,
+			getPerpTanPoint: getPerpTanPoint,
+			isFirst: pointCount == 1,
+			isLast: pointCount >= numPoints
+		});
+	}
+}
+
 exports.Arc = Arc;
