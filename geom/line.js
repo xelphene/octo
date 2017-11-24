@@ -232,6 +232,38 @@ Line.prototype.walk = function(distance, backwards) {
 	return points;
 }
 
+Line.prototype.walkf = function(distance, func) {
+	var numPoints = Math.floor(this.len()/distance);
+	var curPoint = this.start;
+	var xOffset = ( this.end.x-this.start.x ) / ( this.len()/distance );
+	var yOffset = ( this.end.y-this.start.y ) / ( this.len()/distance );
+	var thisLine = this;
+
+	for( var i=1; i<=numPoints; i++ ) 
+	{
+		let getPerpTanPoint = function(distance) {
+			let uv = thisLine.toUnitVector();
+			return curPoint.xlateUnitVector(
+				thisLine.toUnitVector().rotate90cw(),
+				distance
+			);
+		}
+	
+		func({
+			count: i,
+			point: curPoint,
+			isFirst: i==1,
+			isLast: i==numPoints,
+			getPerpTanPoint: getPerpTanPoint
+		});
+		
+		curPoint = new Point(
+			curPoint.x + xOffset,
+			curPoint.y + yOffset
+		);
+	}
+}
+
 Line.prototype.toUnitVector = function() {
 	var x = this.end.x-this.start.x;
 	var y = this.end.y-this.start.y;
