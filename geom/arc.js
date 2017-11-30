@@ -440,6 +440,7 @@ Arc.prototype.walk = function(distance, backwards)
 
 Arc.prototype.walkf = function(distance, func)
 {
+	// TODO: This is deprecated. use walkPoints instead.
 	var pointCount=0;
 	var numPoints = Math.floor(this.len() / distance)+1;
 	
@@ -458,7 +459,7 @@ Arc.prototype.walkf = function(distance, func)
 			return curPoint.xlateUnitVector(
 				radiusLine.toUnitVector(),
 				distance
-			)
+			);
 		}
 		
 		func({
@@ -469,6 +470,99 @@ Arc.prototype.walkf = function(distance, func)
 			isLast: pointCount >= numPoints
 		});
 	}
+}
+
+Arc.prototype.walkPoints = function(distance, func) 
+{
+	var pointCount=0;
+	var numPoints = Math.floor(this.len() / distance)+1;
+	
+	while( pointCount < numPoints ) 
+	{
+		pointCount+=1;
+		
+		let curPoint = this.walkSingle(distance*(pointCount-1))
+		
+		func(
+			new WalkPoint({
+				point: curPoint,
+				index: pointCount-1,
+				maxIndex: numPoints-1,
+				center: this.center()
+			})
+		);
+				
+	}	
+}
+
+Arc.prototype.getStartWalkPoint = function() 
+{
+	return new WalkPoint({
+		point: this.start,
+		index: 0,
+		maxIndex: 0,
+		center: this.center()
+	});
+}
+
+Arc.prototype.getEndWalkPoint = function() 
+{
+	return new WalkPoint({
+		point: this.end,
+		index: 0,
+		maxIndex: 0,
+		center: this.center()
+	});
+}
+
+
+var WalkPoint = function({point, index, maxIndex, center}) {
+	this.point = point;
+	this.index = index;
+	this.maxIndex = maxIndex;
+	this.center = center;
+}
+
+WalkPoint.prototype.isFirst = function() {
+	return this.index==0;
+}
+
+WalkPoint.prototype.isLast = function() {
+	return this.index==this.maxIndex;
+}
+
+WalkPoint.prototype.xlateTan = function(distance) {
+	// TODO: returns a point in an inconsistent direction. need to know 
+	// the direction around the arc we're walking
+	return this.point.xlateSlope(this.tanSlope, distance);
+}
+
+WalkPoint.prototype.xlateOutward = function(distance) {
+	var radiusLine = new Line(
+		this.center,
+		this.point
+	);
+
+	return this.point.xlateUnitVector(
+		radiusLine.toUnitVector(),
+		distance
+	);
+}
+
+WalkPoint.prototype.xlateInward = function(distance) {
+	var radiusLine = new Line(
+		this.center,
+		this.point
+	);
+
+	return this.point.xlateUnitVector(
+		radiusLine.toUnitVector(),
+		-distance
+	);
+}
+
+WalkPoint.prototype.toString = function() {
+	return this.point.toString();
 }
 
 exports.Arc = Arc;
