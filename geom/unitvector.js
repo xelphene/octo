@@ -1,5 +1,6 @@
 
 const roundTo = require('../util').roundTo;
+const Line = require('./line').Line;
 
 var UnitVector = function(x,y) {
 	var mag = Math.sqrt( Math.pow(x,2) + Math.pow(y,2) );
@@ -21,6 +22,13 @@ UnitVector.prototype.rotate90ccw = function() {
 
 UnitVector.prototype.toString = function() {
 	return roundTo(this.x,2)+','+roundTo(this.y,2);
+}
+
+UnitVector.prototype.toLine = function() {
+	return new Line({
+		start: [0,0],
+		end: [x,y]
+	});
 }
 
 exports.UnitVector = UnitVector;
