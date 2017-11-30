@@ -4,6 +4,7 @@ const cos  = require('../util').cos;
 const tan  = require('../util').atan;
 const asin = require('../util').asin;
 const roundTo = require('../util').roundTo;
+//const Line = require('./line').Line;
 
 var Point = function(x,y) {
 	if( typeof(x)!='number' || isNaN(x) ) {
@@ -43,8 +44,21 @@ Point.prototype.xlateUnitVector = function(v, d) {
 	return new Point( this.x + d*v.x, this.y + d*v.y );
 }
 
+Point.prototype.xlateSlope = function(m, d) {
+	var k = d/Math.sqrt(1+Math.pow(m,2));
+	var x = this.x + k;
+	var y = this.y + k*m;
+	return new Point(x,y);
+}
+
 Point.prototype.ymirror = function() {
 	return new Point( -this.x, this.y );
 };
+
+Point.prototype.distanceFrom = function(otherPoint) {
+	a = Math.abs(this.x - otherPoint.x);
+	b = Math.abs(this.y - otherPoint.y);
+	return Math.sqrt( Math.pow(a,2) + Math.pow(b,2) );
+}
 
 exports.Point = Point;
