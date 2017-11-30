@@ -233,7 +233,7 @@ Line.prototype.walk = function(distance, backwards) {
 }
 
 Line.prototype.walkf = function(distance, func) {
-	var numPoints = Math.floor(this.len()/distance);
+	var numPoints = Math.floor(this.len()/distance)+1;
 	var curPoint = this.start;
 	var xOffset = ( this.end.x-this.start.x ) / ( this.len()/distance );
 	var yOffset = ( this.end.y-this.start.y ) / ( this.len()/distance );
