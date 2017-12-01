@@ -438,6 +438,29 @@ Arc.prototype.walk = function(distance, backwards)
 	return points;
 }
 
+Arc.prototype.walkMap = function(stepDistance, func)
+{
+	var pointCount=0;
+	var numPoints = Math.floor(this.len() / stepDistance)+1;
+	
+	while( pointCount < numPoints ) 
+	{
+		pointCount+=1;
+		
+		let curPoint = this.walkSingle(stepDistance*(pointCount-1))
+		
+		func( new ArcStepPoint({
+			x: curPoint.x, y: curPoint.y,
+			arc: this,
+			stepIndex: pointCount-1, stepMax: numPoints-1
+		}));
+			//	index: pointCount-1,
+			//	maxIndex: numPoints-1,
+				
+	}	
+	
+}
+
 Arc.prototype.walkf = function(distance, func)
 {
 	// TODO: This is deprecated. use walkPoints instead.
@@ -495,6 +518,16 @@ Arc.prototype.walkPoints = function(distance, func)
 	}	
 }
 
+Arc.prototype.getStartArcPoint = function()
+{
+	return new ArcPoint(this.start.x, this.start.y, this);
+}
+
+Arc.prototype.getEndArcPoint = function()
+{
+	return new ArcPoint(this.end.x, this.end.y, this);
+}
+
 Arc.prototype.getStartWalkPoint = function() 
 {
 	return new WalkPoint({
@@ -515,6 +548,60 @@ Arc.prototype.getEndWalkPoint = function()
 	});
 }
 
+// **********************************************************
+
+var ArcPoint = function(x,y,arc) {
+	Point.apply(this,[x,y]);
+	this.arc = arc;
+}
+
+ArcPoint.prototype = Object.create(Point.prototype);
+
+ArcPoint.prototype.xlateOutward = function(distance) {
+	var radiusLine = new Line(
+		this.arc.center(),
+		this
+	);
+
+	return this.xlateUnitVector(
+		radiusLine.toUnitVector(),
+		distance
+	);
+}
+
+ArcPoint.prototype.xlateInward = function(distance) {
+	var radiusLine = new Line(
+		this.arc.center(),
+		this
+	);
+
+	return this.xlateUnitVector(
+		radiusLine.toUnitVector(),
+		-distance
+	);
+}
+
+// **********************************************************
+
+var ArcStepPoint = function({x,y,arc,stepIndex,stepMax}) {
+	ArcPoint.apply(this,[x,y,arc]);
+	this.stepIndex = stepIndex;
+	this.stepMax = stepMax;
+}
+
+ArcStepPoint.prototype = Object.create(ArcPoint.prototype);
+
+ArcStepPoint.prototype.isFirst = function() {
+	return this.stepIndex==0;
+}
+
+ArcStepPoint.prototype.isLast = function() {
+	return this.stepIndex==this.stepMax;
+}
+
+
+
+// **********************************************************
 
 var WalkPoint = function({point, index, maxIndex, center}) {
 	this.point = point;
