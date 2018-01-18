@@ -3,6 +3,7 @@ const Shape = require('./shape').Shape;
 const Point = require('./point').Point;
 const UnitVector = require('./unitvector').UnitVector;
 const radiansToDegrees = require('../util').radiansToDegrees;
+const makeDualCardinalPicker = require('./point').makeDualCardinalPicker;
 
 var Line = function() {
 	Shape.apply(this, arguments);
@@ -264,10 +265,104 @@ Line.prototype.walkf = function(distance, func) {
 	}
 }
 
+Line.prototype.walkMap = function(distance, func) {
+	var numPoints = Math.floor(this.len()/distance)+1;
+	var curPoint = this.start;
+	var xOffset = ( this.end.x-this.start.x ) / ( this.len()/distance );
+	var yOffset = ( this.end.y-this.start.y ) / ( this.len()/distance );
+	var thisLine = this;
+
+	for( var i=1; i<=numPoints; i++ ) 
+	{
+		func( new LineStepPoint({
+			x: curPoint.x, y: curPoint.y,
+			line: thisLine,
+			stepIndex: i-1, stepMax: numPoints-1
+		}));
+		
+		curPoint = new Point(
+			curPoint.x + xOffset,
+			curPoint.y + yOffset
+		);
+	}
+}
+
 Line.prototype.toUnitVector = function() {
 	var x = this.end.x-this.start.x;
 	var y = this.end.y-this.start.y;
 	return new UnitVector( x/this.len(), y/this.len() );
 }
+
+Line.prototype.reverse = function() {
+	return new Line(this.end, this.start);
+}
+
+// **********************************************************
+
+var LinePoint = function(x,y,line) {
+	Point.apply(this,[x,y]);
+	this.line = line;
+}
+
+LinePoint.prototype = Object.create(Point.prototype);
+
+LinePoint.prototype.xlateLinear = function(distance, dirPref1, dirPref2) {
+	if( !( dirPref1 in ALL_DIR_PREFS ) ) {
+		throw new Error('dirPref1 must be a direction preference constant, not '+dirPref1);
+	}
+	if( !( dirPref2 in ALL_DIR_PREFS ) ) {
+		throw new Error('dirPref2 must be a direction preference constant, not '+dirPref2);
+	}
+	
+	var pp = this.xlateUnitVector(this.line.toUnitVector(), distance);
+	var np = this.xlateUnitVector(this.line.reverse().toUnitVector(), distance);
+	
+	if( dirPref1 == UP ) {
+		if( pp.y > np.y ) {
+			return pp;
+		} else if( pp.y < np.y ) {
+			return np;
+		} else {
+			if( dirPref2 == RIGHT ) {
+				if( pp.x > np.x ) {
+					return pp;
+				} else {
+					return np;
+				}
+			}
+		}
+	} else {
+		throw new Error('dirPref1 must be a direction preference constant, not '+dirPref1);
+	}
+		
+}
+
+LinePoint.prototype.xlatePerpCardinal = function(distance, dirPref1, dirPref2) {
+	var pick = makeDualCardinalPicker(dirPref1, dirPref2);
+	var p1 = this.xlateUnitVector(this.line.toUnitVector().rotate90cw(), distance);
+	var p2 = this.xlateUnitVector(this.line.reverse().toUnitVector().rotate90cw(), distance);
+	var [p, _] = pick(p1,p2);
+	return p;
+}
+
+// **********************************************************
+
+var LineStepPoint = function({x,y,line,stepIndex,stepMax}) {
+	LinePoint.apply(this,[x,y,line]);
+	this.stepIndex = stepIndex;
+	this.stepMax = stepMax;
+}
+
+LineStepPoint.prototype = Object.create(LinePoint.prototype);
+
+LineStepPoint.prototype.isFirst = function() {
+	return this.stepIndex==0;
+}
+
+LineStepPoint.prototype.isLast = function() {
+	return this.stepIndex==this.stepMax;
+}
+
+// **********************************************************
 
 exports.Line = Line;
