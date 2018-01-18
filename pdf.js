@@ -232,20 +232,45 @@ function renderPartPaged(pattern, part, pdfdoc, pageSize, pageMargin) {
 		});
 
 		// draw joint labels
-		var fontSize=12;
 		var extraSpace=4;
-		pdfdoc.fontSize(fontSize);
-		pdfdoc.text(page.top, pageSize.x/2, pageMargin.y+extraSpace);
-		pdfdoc.text(page.bot, pageSize.x/2, pageSize.y-pageMargin.y-fontSize-extraSpace );
-		pdfdoc.text(page.left, pageMargin.x+extraSpace, pageSize.y/2);
-		pdfdoc.text(page.right, pageSize.x - pageMargin.x - fontSize - extraSpace, pageSize.y/2);
-		//pdfdoc.text(page.bot, pageSize.x/2, pageSize.y-pageMargin.y);
-
-		// draw part name watermark
+		var labelSpacing=72;
+		var jointLabelFontSize=12;
 		pdfdoc.strokeOpacity(0.2);
 		pdfdoc.fillOpacity(0.2);
-		pdfdoc.fontSize(24);
-		pdfdoc.text(part.title, pageSize.x/2, pageSize.y/2, width=72*8, align='justify', height=10);
+		pdfdoc.fontSize(jointLabelFontSize);
+		// left/right
+		for( var i=pageMargin.y+labelSpacing; i <= (pageSize.y-pageMargin.y-labelSpacing); i += labelSpacing ) {
+			pdfdoc.text(page.right, pageSize.x - pageMargin.x - jointLabelFontSize - extraSpace, i);
+			pdfdoc.text(page.left, pageMargin.x+extraSpace, i);
+		}
+		// top/bottom
+		for( var i=pageMargin.x+labelSpacing; i <= (pageSize.x-pageMargin.x-labelSpacing); i+=labelSpacing ) {
+			pdfdoc.text(page.top, i, pageMargin.y+extraSpace);
+			pdfdoc.text(page.bot, i, pageSize.y-pageMargin.y-jointLabelFontSize-extraSpace );
+		}
+
+		// draw pattern/part info
+		pdfdoc.strokeOpacity(0.2);
+		pdfdoc.fillOpacity(0.2);
+		titleFontSize = 16;
+		pdfdoc.fontSize(titleFontSize);
+		var infoBox = {
+			topLeft: {
+				x: pageSize.x/4,
+				y: pageSize.y/4
+			},
+			width: (pageSize.x/4)*2,
+			height: (pageSize.y/4)*2,
+			text: [
+				'Pattern: '+pattern.title,
+				'Part: '+part.title
+			]
+		}
+		pdfdoc.text(infoBox.text.join('\n'), infoBox.topLeft.x, infoBox.topLeft.y , {
+			width: infoBox.width,
+			height: infoBox.height,
+			ellipsis: true
+		});
 
 		// if another page comes after this one, add a new page to the doc
 		if( index < (pages.length-1) ) {
