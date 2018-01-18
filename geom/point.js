@@ -4,6 +4,7 @@ const cos  = require('../util').cos;
 const tan  = require('../util').atan;
 const asin = require('../util').asin;
 const roundTo = require('../util').roundTo;
+
 //const Line = require('./line').Line;
 
 var Point = function(x,y) {
@@ -60,5 +61,79 @@ Point.prototype.distanceFrom = function(otherPoint) {
 	b = Math.abs(this.y - otherPoint.y);
 	return Math.sqrt( Math.pow(a,2) + Math.pow(b,2) );
 }
+
+Point.prototype.equals = function(otherPoint, tolerance) {
+	if( tolerance===undefined ) {
+		tolerance=0;
+	}
+	
+	var xok = Math.abs(this.x-otherPoint.x) <= tolerance;
+	var yok = Math.abs(this.y-otherPoint.y) <= tolerance;
+	
+	return xok && yok;
+}
+
+function makeSingleCardinalPicker(dir) {
+	
+	return (p1, p2) => {
+		if( dir=='up' ) {
+			if( p1.y > p2.y ) {
+				return [p1, true];
+			} else if( p2.y > p1.y ) {
+				return [p2, true];
+			} else {
+				return [p1, false];
+			}
+		} else if( dir=='down' ) {
+			if( p1.y < p2.y ) {
+				return [p1, true];
+			} else if( p2.y < p1.y ) {
+				return [p2, true];
+			} else {
+				return [p1, false];
+			}
+		} else if( dir=='left' ) {
+			if( p1.x < p2.x ) {
+				return [p1, true];
+			} else if( p2.x < p1.x ) {
+				return [p2, true];
+			} else {
+				return [p1, false];
+			}
+		} else if( dir=='right' ) {
+			if( p1.x > p2.x ) {
+				return [p1, true];
+			} else if( p2.x > p1.x ) {
+				return [p2, true];
+			} else {
+				return [p1, false];
+			}
+		} else {
+			throw new Error('dir parameter must be "up", "down", "left" or "right", not '+dir);
+		}
+	}
+}
+
+function makeDualCardinalPicker(dir1, dir2) {
+	var pickFirst = makeSingleCardinalPicker(dir1);
+	var pickLast = makeSingleCardinalPicker(dir2);
+	
+	return (p1,p2) => {
+		let [p, distinct] = pickFirst(p1,p2);
+		if( distinct ) {
+			return [p, true];
+		} else {
+			let [p, distinct] = pickLast(p1,p2);
+			if( distinct ) {
+				return [p, true];
+			} else {
+				return [p, false];
+			}
+		}
+	}
+}
+
+exports.makeSingleCardinalPicker = makeSingleCardinalPicker;
+exports.makeDualCardinalPicker = makeDualCardinalPicker;
 
 exports.Point = Point;
