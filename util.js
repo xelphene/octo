@@ -110,12 +110,15 @@ ConicalSurface.prototype.debug = function(f) {
 
 function computeConicalSurface({len, bottomCircumf, topCircumf, spec})
 {
+	/* bottomCircumf must always be the larger of the cone's circles */
+	
 	var br = bottomCircumf / (2*Math.PI);
 	var tr = topCircumf / (2*Math.PI);
 	var at = acos(  (br-tr)/len  );
+
+	var cl = br / Math.abs(cos(at));
+	var tl = tr / Math.abs(cos(at));
 	
-	var cl = br/cos(at);
-	var tl = tr/cos(at);
 
 	if( spec.method=='arclen' ) {
 		if( spec.circle=='bottom' ) {
