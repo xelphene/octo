@@ -45,6 +45,27 @@ Point.prototype.xlateUnitVector = function(v, d) {
 	return new Point( this.x + d*v.x, this.y + d*v.y );
 }
 
+// translate distance d towards some other point p
+Point.prototype.xlateTowards = function(p, d) {
+	var Line = require('./line').Line;
+	var uv = (new Line(this, p)).toUnitVector();
+	return this.xlateUnitVector(uv, d);
+};
+
+Point.prototype.xlateDown = function(d) {
+	return new Point(
+		this.x,
+		this.y-d
+	);
+}
+
+Point.prototype.xlateUp = function(d) {
+	return new Point(
+		this.x,
+		this.y+d
+	);
+}
+
 Point.prototype.xlateSlope = function(m, d) {
 	var k = d/Math.sqrt(1+Math.pow(m,2));
 	var x = this.x + k;
