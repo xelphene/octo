@@ -1,8 +1,9 @@
 
-const Point = require('./point').Point;
-const Shape = require('./shape').Shape;
-const roundTo = require('../util').roundTo;
-const Line = require('./line').Line;
+const Point = require('../point').Point;
+const Shape = require('../shape').Shape;
+const roundTo = require('../../util').roundTo;
+const Line = require('../line').Line;
+const BezierApproximation = require('./approx').BezierApproximation;
 
 var Bezier = function(start, sctl, ectl, end) {
 	Shape.apply(this, arguments);
@@ -50,6 +51,7 @@ var Bezier = function(start, sctl, ectl, end) {
 	}
 
 	this.comment = undefined;
+	this._approximations = {};
 };
 
 function validateBezierArg(a) {
@@ -262,21 +264,6 @@ Bezier.prototype.intervalMapAdv = function(t, f) {
 	}
 }
 
-Bezier.prototype.intervalDeriv = function(t) {
-	var x = (
-		3 * Math.pow((1-t),2) * (this.sctl.x-this.start.x) + // 3 * (1-t)^2 * (sctl-start)
-		6 * (1-t) * t * (this.ectl.x-this.sctl.x) +          
-		3 * Math.pow(t,2) * (this.end.x-this.ectl.x)
-	);
-	var y = (
-		3 * Math.pow((1-t),2) * (this.sctl.y-this.start.y) + // 3 * (1-t)^2 * (sctl-start)
-		6 * (1-t) * t * (this.ectl.y-this.sctl.y) +          
-		3 * Math.pow(t,2) * (this.end.y-this.ectl.y)
-	);
-	return new Point(x,y);
-	//return x/y;
-}
-
 Bezier.prototype.flatten = function(numLines) {
 	if( numLines < 1 ) {
 		throw new Error('numLines must be >=1');
@@ -299,30 +286,36 @@ Bezier.prototype.flatten = function(numLines) {
 	return lines;
 }
 
-Bezier.prototype.len = function(precision) {
+Bezier.prototype.approx = function(precision) {
 
-	/* approximate the length of this Bezier curve. precision must be a
-	positive integer.  The greater the precision, the more accurate this
-	length will be but the longer it will take.  */
+	/* return a new BezierApproximation, which approximates a Bezier curve
+	 * as a series of straight lines.  This is necessary for various
+	 * computations (like length) which can't be computed.
+	 *
+	 * precision must be a postive integer. The higher the precision, the
+	 * closer the approximation will be to the real thing, but the longer it
+	 * will take to compute.
+	 *
+	 * the approximation for a given precision will be cached so it doesn't
+	 * need to be rebuilt for every call to this method.
+	 */
 
-	/* This works based on approximating the curve with straight line
-	 * segments drawn from start to end.  precision is the number of
-	 * segments.  */
-
-	if( precision === undefined ) {
-		precision=10;
+	if( this._approximations[precision] === undefined ) {
+		this._approximations[precision] = new BezierApproximation(this,precision);
 	}
-	var sum=0;
-	this.flatten(precision).map( (line) => {
-		sum+=line.len();
-	});
-	return sum;
+	return this._approximations[precision];
 }
 
-/* TODO: Shape.getExtent() doesn't work right because it counts in our
- * control points.  Instead, create a new PointBox which can have any number
- * of Points added to it one at a time.  the bounds of the box are expanded
- * each time.
- */
+Bezier.prototype.len = function(precision) {
+	return this.approx().len();
+}
+
+Bezier.prototype.getExtent = function(axis, direction) {
+	return this.approx().getExtent(axis, direction);
+}
+
+Bezier.prototype.walkMap = function(stepDistance, func) {
+	return this.approx().walkMap(stepDistance, func);
+}
 
 exports.Bezier = Bezier;

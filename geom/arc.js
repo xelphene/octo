@@ -463,7 +463,7 @@ Arc.prototype.walkMap = function(stepDistance, func)
 
 Arc.prototype.walkf = function(distance, func)
 {
-	// TODO: This is deprecated. use walkPoints instead.
+	// TODO: This is deprecated. use walkMap instead.
 	var pointCount=0;
 	var numPoints = Math.floor(this.len() / distance)+1;
 	
