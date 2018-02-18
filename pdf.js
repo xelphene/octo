@@ -22,6 +22,11 @@ function getClassStyle(className) {
 		return {
 			strokeOpacity: 0.7
 		}
+	} else if( className=='ref' ) {
+		return {
+			strokeOpacity: 0.5,
+			strokeColor: 'green'
+		}
 	} else {
 		return {
 			strokeOpacity: 1.0
@@ -35,7 +40,13 @@ function drawLine(doc, line) {
 
 	var style = getClassStyle(line.getShapeClass());
 
-	doc.strokeOpacity(style.strokeOpacity);
+	if( style.strokeColor===undefined ) {
+		doc.strokeColor('black');
+		doc.strokeOpacity(style.strokeOpacity);
+	} else {
+		doc.strokeColor(style.strokeColor);
+		doc.strokeOpacity(style.strokeOpacity);
+	}
 	//pdfdoc.dash(5);
 	//pdfdoc.stroke();
 	//pdfdoc.undash();
@@ -44,6 +55,7 @@ function drawLine(doc, line) {
 	doc.lineTo( e.x, e.y );
 	doc.stroke();
 
+	doc.strokeColor('black');
 	doc.strokeOpacity(1.0);
 };
 
@@ -66,6 +78,14 @@ function drawBezier(doc, bezier) {
 function drawArc(doc, arc) {
 	var style = getClassStyle(arc.getShapeClass());
 
+	if( style.strokeColor===undefined ) {
+		doc.strokeColor('black');
+		doc.strokeOpacity(style.strokeOpacity);
+	} else {
+		doc.strokeColor(style.strokeColor);
+		doc.strokeOpacity(style.strokeOpacity);
+	}
+
 	var path = format("M {startX},{startY} A{radiusX},{radiusY} {xAxisRotation} {largeArc},{antiClockwise} {endX},{endY}", {
 		startX: arc.start.x, startY: arc.start.y,
 		radiusX: arc.radius, radiusY: arc.radius,
@@ -81,16 +101,25 @@ function drawArc(doc, arc) {
 	doc.stroke();
 
 	doc.strokeOpacity(1.0);
+	doc.strokeColor('black');
 };
 
 function drawCircle(doc, circle) {
 	var style = getClassStyle(circle.getShapeClass());
-	doc.strokeOpacity(style.strokeOpacity);
+
+	if( style.strokeColor===undefined ) {
+		doc.strokeColor('black');
+		doc.strokeOpacity(style.strokeOpacity);
+	} else {
+		doc.strokeColor(style.strokeColor);
+		doc.strokeOpacity(style.strokeOpacity);
+	}
 
 	doc.circle(circle.center.x, circle.center.y, circle.radius);
 	doc.stroke();
 	
 	doc.strokeOpacity(1.0);
+	doc.strokeColor('black');
 }
 
 function drawShape(doc, shape) {

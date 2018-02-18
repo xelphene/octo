@@ -129,6 +129,16 @@ Bezier.prototype.xlate = function(dx, dy) {
 	});
 };
 
+Bezier.prototype.xlateUnitVector = function(v, d) {
+	return new Bezier({
+		start: this.start.xlateUnitVector(v,d),
+		sctl:  this.sctl.xlateUnitVector(v,d),
+		end:   this.end.xlateUnitVector(v,d),
+		ectl:  this.ectl.xlateUnitVector(v,d),
+		shapeClass: this.getShapeClass()
+	});
+}
+
 Bezier.prototype.xlatef = function(xlatePoint, xlateLength) {
 	/* f is a function which takes a Point and returns a Point.
 	 * f will typically move all Points comprising this Shape in
