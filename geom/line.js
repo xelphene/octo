@@ -140,6 +140,14 @@ Line.prototype.xlate = function(dx, dy) {
 	});
 };
 
+Line.prototype.xlateUnitVector = function(v, d) {
+	return new Line({
+		start: this.start.xlateUnitVector(v,d),
+		end:   this.end.xlateUnitVector(v,d),
+		shapeClass: this.getShapeClass()
+	});
+}
+
 Line.prototype.xlatef = function(xlatePoint, xlateLength) {
 	/* f is a function which takes a Point and returns a Point.
 	 * f will typically move all Points comprising this Shape in
