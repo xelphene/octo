@@ -104,7 +104,8 @@ BezierApproximation.prototype.walkMap = function(stepDistance, func) {
 	func( new BezierStepPoint({
 		x: this.bezier.start.x, y:this.bezier.start.y,
 		bezier: this.bezier,
-		stepInex: 0, stepMax: maxPointIndex
+		stepIndex: 0, stepMax: maxPointIndex,
+		vector: this.lines[0].toUnitVector()
 	}));
 
 	var curLinesSum=0;
@@ -132,7 +133,8 @@ BezierApproximation.prototype.walkMap = function(stepDistance, func) {
 			
 			func( new BezierStepPoint({
 				x: point.x, y: point.y, bezier: this.bezier,
-				stepIndex: curPointIndex, stepMax: maxPointIndex
+				stepIndex: curPointIndex, stepMax: maxPointIndex,
+				vector: line.toUnitVector()
 			}));
 			
 			curPointIndex+=1;
