@@ -94,8 +94,13 @@ Point.prototype.equals = function(otherPoint, tolerance) {
 	return xok && yok;
 }
 
-function makeSingleCardinalPicker(dir) {
-	
+/* makeSingleCardinalPicker returns a function which takes two points and
+ * returns whichever of them is more in the cardinal direction
+ * ('up','down','left','right) specified by 'dir'.  Also returned is a
+ * boolean which indicates wether or not the choice was unambiguous.
+ */
+function makeSingleCardinalPicker(dir) 
+{
 	return (p1, p2) => {
 		if( dir=='up' ) {
 			if( p1.y > p2.y ) {
@@ -135,6 +140,12 @@ function makeSingleCardinalPicker(dir) {
 	}
 }
 
+/* makeDualCardinalPicker returns a function which takes two points and
+ * returns whichever one of them is most in the cardinal direction
+ * ('up','down','left','right) specified by dir1.  If they're both equally
+ * in that direction, then it returns whichever is most in the cardinal
+ * direction specified by dir2.
+ */
 function makeDualCardinalPicker(dir1, dir2) {
 	var pickFirst = makeSingleCardinalPicker(dir1);
 	var pickLast = makeSingleCardinalPicker(dir2);
