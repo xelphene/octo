@@ -310,6 +310,27 @@ Arc.prototype.unitArc = function()
 	return this.originCenteredArc().scaleBy(1/this.radius);
 }
 
+// return a function which will xlate any point on this arc to where
+// it would be if this were an origin-centered arc
+Arc.prototype.xlateToUnitArc = function(p) 
+{
+	// move it to origin-centered
+	var p = new Point(
+		p.x - this.center().x,
+		p.y - this.center().y
+	);
+	
+	var scaleFactor = 1/this.radius;
+	
+	// scale it about the origin
+	p = new Point(
+		p.x * scaleFactor,
+		p.y * scaleFactor
+	);
+
+	return p;
+}
+
 Arc.prototype.xlateFromUnitArc = function(p)
 {
 	return new Point(
@@ -505,6 +526,16 @@ Arc.prototype.getEndArcPoint = function()
 	return new ArcPoint(this.end.x, this.end.y, this);
 }
 
+Arc.prototype.xlateInward = function(distance) {
+	return new Arc({
+		start: this.getStartArcPoint().xlateInward(distance),
+		end: this.getEndArcPoint().xlateInward(distance),
+		radius: this.radius-distance,
+		clockwise: this.clockwise,
+		large: this.large
+	});
+}
+
 // **********************************************************
 
 var ArcPoint = function(x,y,arc) {
@@ -537,6 +568,65 @@ ArcPoint.prototype.xlateInward = function(distance) {
 		-distance
 	);
 }
+
+// re: walkSingle
+ArcPoint.prototype.xlateAlong = function(distance)
+{
+	if( ! this.arc.isUnitArc() ) {
+		//throw new Error('not sure');
+		
+		var newArc = this.arc.unitArc();
+		var newPoint = this.arc.xlateToUnitArc(this);
+		var newArcPoint = new ArcPoint(newPoint.x, newPoint.y, newArc);
+		var newDistance = distance*(1/this.arc.radius);
+		
+		//var p = this.unitArc().walkSingle( distance*(1/this.radius), forwards );
+
+		var p = newArcPoint.xlateAlong(newDistance);
+
+		// takes a point, returns a new point
+		return new ArcPoint(
+			this.arc.xlateFromUnitArc(p).x,
+			this.arc.xlateFromUnitArc(p).y,
+			this.arc
+		);
+	}
+	
+	/* at this point, we're working with a unit arc (radius 1, center 0,0)
+	 * and going in the forward direction only (start @start, go distance
+	 * toward end) */
+	
+	var startPoint = this;
+
+	// get the angle of a line from center to start point in radians
+	var startAngle;	
+	if( this.x >= 0 && this.y >= 0 ) {
+		// quad 1. up right + +
+		startAngle = Math.acos(this.x);
+	} else if( this.x < 0 && this.y >=0 ) {
+		// quad 2. up left - +
+		startAngle = Math.acos(this.x);
+	} else if( this.x >= 0 && this.y<0 ) {
+		// quad 4. down right + -
+		startAngle = Math.acos( - Math.abs(this.x) ) + Math.PI;
+	} else {
+		// quad 3. down left - -
+		startAngle = Math.acos(Math.abs(this.x)) + Math.PI;
+	} 
+	
+	/* finding the point a certain distance from the start point is simply a
+	 * matter of adding the distance to the angle as measured in radians */
+	if( this.clockwise ) {
+		var x = Math.cos( startAngle - distance );
+		var y = Math.sin( startAngle - distance );
+	} else {
+		var x = Math.cos(startAngle + distance );
+		var y = Math.sin(startAngle + distance);
+	}
+	
+	return new ArcPoint(x,y,this.arc);
+}
+
 
 // **********************************************************
 

@@ -25,6 +25,7 @@ Shape.prototype.getExtent = function(axis, direction) {
 	return max*direction;
 };
 
+// TODO: should return a new Shape with only shapeClass different
 Shape.prototype.setShapeClass = function(shapeClass) {
 	this._shapeClass = shapeClass;
 }
