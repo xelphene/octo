@@ -28,6 +28,7 @@ Shape.prototype.getExtent = function(axis, direction) {
 // TODO: should return a new Shape with only shapeClass different
 Shape.prototype.setShapeClass = function(shapeClass) {
 	this._shapeClass = shapeClass;
+	return this;
 }
 
 Shape.prototype.getShapeClass = function() {
