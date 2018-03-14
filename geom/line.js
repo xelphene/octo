@@ -298,6 +298,9 @@ Line.prototype.walkMap = function(distance, func) {
 Line.prototype.toUnitVector = function() {
 	var x = this.end.x-this.start.x;
 	var y = this.end.y-this.start.y;
+	if( x==0 && y==0 ) {
+		throw new Error('Cannot create a unit vector from a line of length 0');
+	}
 	return new UnitVector( x/this.len(), y/this.len() );
 }
 
