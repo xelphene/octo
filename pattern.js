@@ -2,6 +2,7 @@
 const geom = require('./geom');
 const roundTo = require('./util').roundTo;
 const Shape = geom.Shape;
+const ShapeCollection = geom.ShapeCollection;
 
 var Pattern = function () {
 	this.unit = 'inch';
@@ -91,7 +92,12 @@ Part.prototype.addShape = function(shape) {
 	this._shapes.push(shape);
 };
 
-Part.prototype.addShapes = function(shapes) {
+Part.prototype.addShapes = function(shapes) 
+{
+	if( shapes instanceof ShapeCollection ) {
+		shapes = shapes.getArray();
+	}
+	
 	shapes.map( (shape) => {
 		this.addShape(shape);
 	});

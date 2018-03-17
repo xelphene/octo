@@ -5,6 +5,7 @@ const Shape = require('./shape').Shape;
 const Point = require('./point').Point;
 const Line = require('./line').Line;
 const Circle = require('./circle').Circle;
+const ShapeCollection = require('./collection').ShapeCollection;
 
 // DEPRECATED
 function bezier(params) {
@@ -80,4 +81,5 @@ exports.circleFromPoints = circleFromPoints;
 exports.Shape = Shape;
 exports.extractShapesFromObject = extractShapesFromObject;
 exports.Circle = Circle;
+exports.ShapeCollection = ShapeCollection;
 exports.point = require('./point');
