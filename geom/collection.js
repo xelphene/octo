@@ -21,6 +21,12 @@ ShapeCollection.prototype.concat = function(shapeCollection) {
 	);
 }
 
+ShapeCollection.prototype.map = function(f) {
+	return new ShapeCollection(
+		this._shapes.map(f)
+	);
+}
+
 ShapeCollection.prototype.ymirror = function() {
 	return new ShapeCollection(
 		this._shapes.map( (s) => s.ymirror() )
