@@ -7,16 +7,48 @@ const roundTo = require('../util').roundTo;
 
 //const Line = require('./line').Line;
 
-var Point = function(x,y) {
-	if( typeof(x)!='number' || isNaN(x) ) {
-		throw new Error('number required for x to Point constructor, not '+x);
+var Point = function() 
+{
+	if( arguments.length==1 ) {
+		if( Array.isArray(arguments[0]) ) {
+			if( arguments[0].length!=2 ) {
+				throw new Error('if Point constructor is called with an array as sole argument, it must be an array of two numbers, not '+arguments[0]);
+			}
+			if( typeof(arguments[0][0]) == 'number' && typeof(arguments[0][1])=='number' ) {
+				this._x = arguments[0][0];
+				this._y = arguments[0][1];
+			} else {
+				throw new TypeError('if sole argument is an array, it must be an array of two numbers, not '+arguments[0]);
+			}
+		} else if( arguments[0] instanceof Point ) {
+			this._x = arguments[0].x;
+			this._y = arguments[0].y;
+		} else {
+			throw new TypeError('if Point constructor is called with one argument, it must ben array of two numbers, not '+arguments[0]);
+		}
+	} else if( arguments.length==2 ) {
+		let x = arguments[0];
+		let y = arguments[1];
+		if( typeof(x)!='number' || isNaN(x) ) {
+			throw new Error('number required for x to Point constructor, not '+x);
+		}
+		if( typeof(y)!='number' || isNaN(y) ) {
+			throw new Error('number required for x to Point constructor, not '+y);
+		}
+		this._x = x;
+		this._y = y;
+	} else {
+		throw new Error('Point constructor needs two arguments');
 	}
-	if( typeof(y)!='number' || isNaN(y) ) {
-		throw new Error('number required for x to Point constructor, not '+y);
-	}
-	this.x = x;
-	this.y = y;
 };
+
+Object.defineProperty(Point.prototype, 'x', {
+	get: function() { return this._x; }
+});
+
+Object.defineProperty(Point.prototype, 'y', {
+	get: function() { return this._y; }
+});
 
 Point.prototype.toString = function() {
 	return 'Point(' + roundTo(this.x,3) + ',' + roundTo(this.y,3) + ')';
