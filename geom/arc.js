@@ -6,6 +6,7 @@ const asin  = require('../util').asin;
 const sin  = require('../util').sin;
 const cos  = require('../util').cos;
 const isNegative = require('../util').isNegative;
+const radiansToDegrees = require('../util').radiansToDegrees;
 
 var Arc = function() {
 	Shape.apply(this, arguments);
@@ -534,6 +535,53 @@ Arc.prototype.xlateInward = function(distance) {
 		clockwise: this.clockwise,
 		large: this.large
 	});
+}
+
+/* return a new arc with the following properties:
+ * - start point will be similar to this arc's start point
+ * - length will be the same as this
+ * - radius will be newRadius
+ * - new end point will be different 
+ * - new center will be on line this.center()->this.start
+ */
+Arc.prototype.bendToRadius = function(newRadius) {
+	var newCenter = this.getStartArcPoint().xlateTowards(this.center(), newRadius);
+	console.log('newCenter: '+newCenter);
+
+	// based on https://math.stackexchange.com/questions/275201/how-to-find-an-end-point-of-an-arc-given-another-end-point-radius-and-arc-dire
+	var r = Math.sqrt(
+		Math.pow( this.start.x-newCenter.x , 2 ) +
+		Math.pow( this.start.y-newCenter.y , 2 )
+	);
+	var angle = Math.atan2(this.start.y-newCenter.y, this.start.x-newCenter.x);
+	if( this.clockwise ) {
+		angle = angle - this.len() / r;
+	} else {
+		angle = angle + this.len() / r;
+	}
+	var ex = newCenter.x + r * Math.cos(angle);
+	var ey = newCenter.y + r * Math.sin(angle);
+	var newEnd = new Point(ex, ey);
+	
+	if( Math.abs(angle) > Math.PI*2 ) {
+		var large = true;
+	} else {
+		var large = false;
+	}
+	
+	var newArc = new Arc({
+		start: this.start,
+		end: newEnd,
+		radius: newRadius,
+		clockwise: this.clockwise,
+		large: large
+	});
+	
+	if( Math.abs(newArc.len()-this.len()) > 0.00001 ) {
+		throw new Error('new arc len '+newArc.len()+' != this.len '+this.len());
+	}
+	
+	return newArc;
 }
 
 // **********************************************************
