@@ -108,6 +108,10 @@ Line.prototype.len = function() {
 	return Math.sqrt( Math.pow(a,2) + Math.pow(b,2) );
 };
 
+Object.defineProperty(Line.prototype, 'length', {
+	get: function() { return this.len() }
+});
+
 Line.prototype.slope = function() {
 	// y = mx+b
 	return (this.end.y - this.start.y) / (this.end.x - this.start.x);
