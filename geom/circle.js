@@ -1,4 +1,5 @@
 
+const cos = require('../util').cos;
 const Shape = require('./shape').Shape;
 const Point = require('./point').Point;
 const Line = require('./line').Line;
@@ -297,5 +298,32 @@ CirclePoint.prototype.xlateAlongCounterCW = function (distance) {
 
 // ***********************************************************
 
-exports.Circle = Circle;
+/* given two points (a, b) that lie on a circle, and a unit vector u which
+ * points to the center of that circle, return the circle
+*/
+function circleFromPointsUV(a,b,u) {
+	var chord = new Line(a,b);
+	var chordAngle = chord.toUnitVector().angleFrom(u);
+	var radius = Math.abs( (chord.length/2)/cos(chordAngle) );
+	var center = a.xlateUnitVector(u, radius);
 
+	//console.log('center: '+center);
+	//console.log('radius: '+radius);
+
+	var ac = new Line(a,center);
+	var bc = new Line(b,center);
+	if( ac.length != bc.length ) {
+		throw new Error("Requested circle is impossible. Try turning rotating the unit vector 180 degrees.");
+	}
+
+	return new Circle({
+		center: center,
+		radius: radius
+	});
+}
+
+// ***********************************************************
+
+
+exports.Circle = Circle;
+exports.circleFromPointsUV = circleFromPointsUV;

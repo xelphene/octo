@@ -1,5 +1,7 @@
 
 const Point = require('./point').Point;
+const Circle = require('./circle').Circle;
+const circleFromPointsUV = require('./circle').circleFromPointsUV;
 const Shape = require('./shape').Shape;
 const Line  = require('./line').Line;
 const asin  = require('../util').asin;
@@ -696,4 +698,37 @@ ArcStepPoint.prototype.isLast = function() {
 
 // **********************************************************
 
+/* given two points (a, b) that lie on a circle, and a unit vector u which
+ * points to the center of that circle, return the circle
+*/
+function arcFromPointsUV({start, end, uv, large, tolerance}) 
+{
+	if( tolerance===undefined ) {
+		tolerance=0.00001;
+	}
+
+	var c = circleFromPointsUV(start, end, uv);
+	var a1 = new Arc({
+		start: start, end: end,
+		radius: c.radius,
+		large: large, clockwise: true
+	});
+	var a2 = new Arc({
+		start: start, end: end,
+		radius: c.radius,
+		large: large, clockwise: false
+	});
+
+	if( a1.center().equals(c.center, tolerance) ) {
+		return a1;
+	} else if( a2.center().equals(c.center, tolerance) ) {
+		return a2;
+	} else {
+		throw new Error('could not find requested arc');
+	}
+}
+
+// **********************************************************
+
 exports.Arc = Arc;
+exports.arcFromPointsUV = arcFromPointsUV;
