@@ -8,15 +8,6 @@ const Circle = require('./circle').Circle;
 const UnitVector = require('./unitvector').UnitVector;
 const ShapeCollection = require('./collection').ShapeCollection;
 
-// DEPRECATED
-function bezier(params) {
-	console.warn('octo.geom.bezier is deprecated');
-	return new Bezier(
-		params.start, params.sctl,
-		params.ectl, params.end
-	);
-};
-
 function circleFromPoints( a, b, c ) {
 	var r = new Line(a,b);
 	var t = new Line(b,c);
@@ -86,6 +77,6 @@ exports.ShapeCollection = ShapeCollection;
 exports.point = require('./point');
 exports.line = require('./line');
 exports.circle = require('./circle');
-exports.bezier = bezier;
+exports.bezier = require('./bezier');
 exports.arc = require('./arc');
 exports.unitvector = require('./unitvector');
