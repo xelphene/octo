@@ -548,7 +548,6 @@ Arc.prototype.xlateInward = function(distance) {
  */
 Arc.prototype.bendToRadius = function(newRadius) {
 	var newCenter = this.getStartArcPoint().xlateTowards(this.center(), newRadius);
-	console.log('newCenter: '+newCenter);
 
 	// based on https://math.stackexchange.com/questions/275201/how-to-find-an-end-point-of-an-arc-given-another-end-point-radius-and-arc-dire
 	var r = Math.sqrt(
