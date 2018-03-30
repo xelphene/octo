@@ -98,6 +98,20 @@ Point.prototype.xlateUp = function(d) {
 	);
 }
 
+Point.prototype.xlateRight = function(d) {
+	return new Point(
+		this.x+d,
+		this.y
+	);
+}
+
+Point.prototype.xlateLeft = function(d) {
+	return new Point(
+		this.x-d,
+		this.y
+	);
+}
+
 Point.prototype.xlateSlope = function(m, d) {
 	var k = d/Math.sqrt(1+Math.pow(m,2));
 	var x = this.x + k;
