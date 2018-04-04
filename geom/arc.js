@@ -268,6 +268,13 @@ Arc.prototype.len = function() {
 	return c * (this.angle()/360);
 }
 
+Object.defineProperty(Arc.prototype, 'length', {
+	get: function() {
+		var c = this.radius*Math.PI*2;
+		return c * (this.angle()/360);
+	}
+});
+
 Arc.prototype.originCenteredArc = function() {
 	var start = new Point(
 		this.start.x - this.center().x,
