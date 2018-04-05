@@ -320,9 +320,11 @@ Bezier.prototype.len = function(precision) {
 	return this.approx().len();
 }
 
-Bezier.prototype.defineProperty(Bezier.prototype, 'length', {
-	return this.approx().len();
-}
+Object.defineProperty(Bezier.prototype, 'length', {
+	get: function() {
+		return this.approx().len();
+	}
+});
 
 Bezier.prototype.getExtent = function(axis, direction) {
 	return this.approx().getExtent(axis, direction);
