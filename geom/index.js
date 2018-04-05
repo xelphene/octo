@@ -79,4 +79,5 @@ exports.line = require('./line');
 exports.circle = require('./circle');
 exports.bezier = require('./bezier');
 exports.arc = require('./arc');
+exports.collection = require('./collection');
 exports.unitvector = require('./unitvector');
