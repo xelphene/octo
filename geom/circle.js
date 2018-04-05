@@ -312,9 +312,9 @@ function circleFromPointsUV(a,b,u) {
 
 	var ac = new Line(a,center);
 	var bc = new Line(b,center);
-	if( ac.length != bc.length ) {
-		throw new Error("Requested circle is impossible. Try turning rotating the unit vector 180 degrees.");
-	}
+	//if( ac.length != bc.length ) {
+	//	throw new Error("Requested circle is impossible. Try turning rotating the unit vector 180 degrees.");
+	//}
 
 	return new Circle({
 		center: center,
