@@ -46,7 +46,7 @@ BezierStepPoint.prototype.xlateRight = function(dist) {
 	return this.xlateUnitVector(this.vector.rotate90cw(), dist);
 }
 
-BezierPoint.prototype.xlatePerpCardinal = function(distance, dirPref1, dirPref2) {
+BezierStepPoint.prototype.xlatePerpCardinal = function(distance, dirPref1, dirPref2) {
 	var pick = makeDualCardinalPicker(dirPref1, dirPref2);
 	var p1 = this.xlateUnitVector(this.vector.rotate90cw(), distance);
 	var p2 = this.xlateUnitVector(this.vector.rotate90cw(), -distance);
