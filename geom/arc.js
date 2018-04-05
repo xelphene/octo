@@ -9,6 +9,7 @@ const sin  = require('../util').sin;
 const cos  = require('../util').cos;
 const isNegative = require('../util').isNegative;
 const radiansToDegrees = require('../util').radiansToDegrees;
+const makeDualCardinalPicker = require('./point').makeDualCardinalPicker;
 
 var Arc = function() {
 	Shape.apply(this, arguments);
@@ -623,6 +624,14 @@ ArcPoint.prototype.xlateInward = function(distance) {
 		radiusLine.toUnitVector(),
 		-distance
 	);
+}
+
+ArcPoint.prototype.xlatePerpCardinal = function(distance, dirPref1, dirPref2) {
+	var pick = makeDualCardinalPicker(dirPref1, dirPref2);
+	var p1 = this.xlateOutward(distance);
+	var p2 = this.xlateInward(distance);
+	var [p, _] = pick(p1,p2);
+	return p;
 }
 
 // re: walkSingle
