@@ -188,6 +188,13 @@ Circle.prototype.xlatePointFromUnitCircle = function(p)
 	);	
 }
 
+Circle.prototype.isPointOn = function(p) {
+	var diff = Math.abs(
+		new Line(this.center, p).length -
+		this.radius
+	);
+	return diff < 0.00001;
+}
 
 // ***********************************************************
 
