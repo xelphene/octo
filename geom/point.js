@@ -4,6 +4,7 @@ const cos  = require('../util').cos;
 const tan  = require('../util').atan;
 const asin = require('../util').asin;
 const roundTo = require('../util').roundTo;
+const tolerance = require('./tolerance');
 
 //const Line = require('./line').Line;
 
@@ -129,13 +130,9 @@ Point.prototype.distanceFrom = function(otherPoint) {
 	return Math.sqrt( Math.pow(a,2) + Math.pow(b,2) );
 }
 
-Point.prototype.equals = function(otherPoint, tolerance) {
-	if( tolerance===undefined ) {
-		tolerance=0;
-	}
-	
-	var xok = Math.abs(this.x-otherPoint.x) <= tolerance;
-	var yok = Math.abs(this.y-otherPoint.y) <= tolerance;
+Point.prototype.equals = function(otherPoint) {
+	var xok = Math.abs(this.x-otherPoint.x) <= tolerance.get();
+	var yok = Math.abs(this.y-otherPoint.y) <= tolerance.get();
 	
 	return xok && yok;
 }

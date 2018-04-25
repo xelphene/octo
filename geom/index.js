@@ -81,3 +81,4 @@ exports.bezier = require('./bezier');
 exports.arc = require('./arc');
 exports.collection = require('./collection');
 exports.unitvector = require('./unitvector');
+exports.tolerance = require('./tolerance');
