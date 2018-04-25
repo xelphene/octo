@@ -2,6 +2,7 @@
 const roundTo = require('../util').roundTo;
 const acos = require('../util').acos;
 const atan = require('../util').atan;
+const asin = require('../util').asin;
 const cos = require('../util').cos;
 const sin = require('../util').sin;
 
@@ -23,8 +24,12 @@ UnitVector.prototype.rotate90ccw = function() {
 	return new UnitVector(-this.y, this.x);
 }
 
-UnitVector.prototype.toString = function() {
-	return roundTo(this.x,10)+','+roundTo(this.y,10);
+UnitVector.prototype.toString = function(precision) {
+	if( precision!==undefined ) {
+		return roundTo(this.x,precision)+','+roundTo(this.y,precision);
+	} else {
+		return this.x+','+this.y;
+	}
 }
 
 UnitVector.prototype.dotProduct = function(uv) {
@@ -46,7 +51,29 @@ UnitVector.prototype.rotate = function(angle) {
 
 Object.defineProperty(UnitVector.prototype, 'directionAngle', {
 	get: function() {
-		return atan(this.y/this.x);
+		if( this.quadrant==1 ) {
+			return atan(this.y/this.x);
+		} else if( this.quadrant==2 ) {
+			return 180+atan(this.y/this.x);
+		} else if( this.quadrant==3 ) {
+			return 180+atan(this.y/this.x);
+		} else {
+			return 360+atan(this.y/this.x);
+		}
+	}
+});
+
+Object.defineProperty(UnitVector.prototype, 'quadrant', {
+	get: function() {
+		if( this.x>=0 && this.y>=0 ) {
+			return 1;
+		} else if( this.x<0 && this.y>=0 ) {
+			return 2;
+		} else if( this.x<0 && this.y<0 ) {
+			return 3;
+		} else{
+			return 4;
+		}
 	}
 });
 
