@@ -51,15 +51,18 @@ UnitVector.prototype.rotate = function(angle) {
 
 Object.defineProperty(UnitVector.prototype, 'directionAngle', {
 	get: function() {
+		var da;
 		if( this.quadrant==1 ) {
-			return atan(this.y/this.x);
+			da = atan(this.y/this.x);
 		} else if( this.quadrant==2 ) {
-			return 180+atan(this.y/this.x);
+			da = 180+atan(this.y/this.x);
 		} else if( this.quadrant==3 ) {
-			return 180+atan(this.y/this.x);
+			da = 180+atan(this.y/this.x);
 		} else {
-			return 360+atan(this.y/this.x);
+			da = 360+atan(this.y/this.x);
 		}
+		if( da==360 ) { da=0 };
+		return da;
 	}
 });
 
