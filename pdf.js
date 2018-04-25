@@ -515,6 +515,7 @@ function pdfizePattern(pattern) {
 			bottom: computeDocSize(pattern, part).y
 		});
 		ppart.title = part.title;
+		ppart.previewOnly = part.previewOnly;
 		//ppart.shapes = coordXform(pattern, part);
 		ppart.addShapes( coordXform(pattern, part) );
 		ppattern.parts.push(ppart);
@@ -655,7 +656,7 @@ function genpdf(pattern, outfn, pageOptions) {
 
 	ppattern.parts.forEach( function(ppart, index) {
 		renderPartScaled(ppattern, ppart, doc, octoPageSize, pageMargin, previewGridSpacing, origUnit=pattern.unit);
-		if( pageOptions.getSections() == 'all' ) {
+		if( pageOptions.getSections() == 'all' && ppart.previewOnly==false ) {
 			doc.addPage();
 			renderPartPaged(ppattern, ppart, doc, octoPageSize, pageMargin);
 		}

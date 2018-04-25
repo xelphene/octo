@@ -58,6 +58,7 @@ var Part = function() {
 	this._namedShapes = {};
 	this._bbox = null; // null means auto
 	this._autoBoundingBoxPadding = 0;
+	this._previewOnly = false;
 	this.title = 'Untitled Part';
 };
 
@@ -206,6 +207,7 @@ Part.prototype.scaleBy = function(s) {
 	//console.log('scaleBy '+sx+' '+sy);
 	spart = new Part();
 	spart.title = this.title;
+	spart.previewOnly = this.previewOnly;
 
 	spart.setBoundingBox({
 		left: this.getBoundingBox().left * s,
@@ -217,8 +219,20 @@ Part.prototype.scaleBy = function(s) {
 	this.getShapes().map( function(shape) {
 		spart.addShape( shape.scaleBy(s) );
 	});
+
 	return spart;
 };
+
+Object.defineProperty(Part.prototype, 'previewOnly', {
+	get: function() { return this._previewOnly; },
+	set: function(v) {
+		if( v ) {
+			this._previewOnly=true;
+		} else {
+			this._previewOnly=false;
+		}
+	}
+});
 
 exports.Pattern = Pattern;
 exports.Part = Part;
