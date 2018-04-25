@@ -120,19 +120,76 @@ function validateArcArg(a) {
 
 Arc.prototype = Object.create(Shape.prototype);
 
-/*
-Arc.prototype.center = function() {
-	// TODO: make this computed in the future
-	return this.preComputedCenter;
-};
-*/
-
 Arc.prototype.getPointNames = function() {
 	return ['start','end'];
 };
 
-// TODO: inherited getExtent is NOT correct. must take radius into account
-// usually
+Arc.prototype.getExtent = function(axis, direction) {
+	if( axis=='x' ) {
+		if( direction==1 ) {
+			return this.getExtentRight();
+		} else {
+			return this.getExtentLeft();
+		}
+	} else {
+		if( direction==1 ) {
+			return this.getExtentTop();
+		} else {
+			return this.getExtentBottom();
+		}
+	}
+}
+
+Arc.prototype.getExtentTop = function() {
+	if( this.isPointOn( this.getCircle().getTopPoint() ) ) {
+		return this.center().y + this.radius;
+	} else {
+		return Math.max.apply(null, [
+			this.start.y,
+			this.end.y
+		]);
+	}
+}
+
+Arc.prototype.getExtentBottom = function() {
+	if( this.isPointOn( this.getCircle().getBottomPoint() ) ) {
+		return this.center().y - this.radius;
+	} else {
+		return Math.min.apply(null, [
+			this.start.y,
+			this.end.y
+		]);
+	}
+}
+
+Arc.prototype.getExtentRight = function() {
+	if( this.isPointOn( this.getCircle().getRightPoint() ) ) {
+		return this.center().x + this.radius;
+	} else {
+		return Math.max.apply(null, [
+			this.start.x,
+			this.end.x
+		]);
+	}
+}
+
+Arc.prototype.getExtentLeft = function() {
+	if( this.isPointOn( this.getCircle().getLeftPoint() ) ) {
+		return this.center().x - this.radius;
+	} else {
+		return Math.min.apply(null, [
+			this.start.x,
+			this.end.x
+		]);
+	}
+}
+
+Arc.prototype.getCircle = function() {
+	return new Circle({
+		center: this.center(),
+		radius: this.radius
+	});
+}
 
 Arc.prototype.ymirror = function() {
 	return new Arc({
@@ -444,7 +501,7 @@ Arc.prototype.walkSingle = function(distance, forwards)
 		// quad 3. down left - -
 		startAngle = Math.acos(Math.abs(startPoint.x)) + Math.PI;
 	} 
-	
+
 	/* finding the point a certain distance from the start point is simply a
 	 * matter of adding the distance to the angle as measured in radians */
 	if( this.clockwise ) {
@@ -454,7 +511,7 @@ Arc.prototype.walkSingle = function(distance, forwards)
 		var x = Math.cos(startAngle + distance );
 		var y = Math.sin(startAngle + distance);
 	}
-	
+
 	return new Point(x,y);
 }
 
@@ -591,6 +648,62 @@ Arc.prototype.bendToRadius = function(newRadius) {
 	}
 	
 	return newArc;
+}
+
+Arc.prototype.getStartDirectionAngle = function() {
+	return new Line(this.center(), this.start).toUnitVector().directionAngle;
+}
+
+Arc.prototype.getEndUnitVector = function() {
+	return new Line(this.center(), this.end).toUnitVector();
+}
+
+Arc.prototype.getEndDirectionAngle = function() {
+	return new Line(this.center(), this.end).toUnitVector().directionAngle;
+}
+
+Arc.prototype.invert = function() {
+	return new Arc({
+		start: this.start,
+		end: this.end,
+		radius: this.radius,
+		clockwise: ! this.clockwise,
+		large: ! this.large
+	});
+}
+
+Arc.prototype.isPointOn = function(p) 
+{
+	if( ! this.getCircle().isPointOn(p) ) {
+		return false;
+	}
+
+	if( p.equals(this.start) || p.equals(this.end) ) {
+		/* p on the start or end point? special cased here because this
+		 * isn't handled correctly by the if/else blocks at the end of this
+		 * function.  */
+		return true;
+	}
+
+	// direction angle for center->p
+	var a = new Line(this.center(), p).toUnitVector().directionAngle;
+
+	if( ! this.large ) 
+	{
+		if( this.clockwise ) {
+			return (
+				a<=this.getStartDirectionAngle() &&
+				a>=this.getEndDirectionAngle() 
+			);
+		} else {
+			return (
+				a>=this.getStartDirectionAngle() &&
+				a<=this.getEndDirectionAngle()
+			);
+		}
+	} else {
+		return ! this.invert().isPointOn(p);
+	}
 }
 
 // **********************************************************
