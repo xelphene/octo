@@ -375,7 +375,41 @@ Arc.prototype.isUnitArc = function()
 
 Arc.prototype.unitArc = function()
 {
-	return this.originCenteredArc().scaleBy(1/this.radius);
+	var ua = this.originCenteredArc().scaleBy(1/this.radius);
+	
+	/* due to floating point inaccuracies, this function up to this point
+	 * may compute a unit arc with some point's component > 0 or < -1.
+	 *
+	 * Take this Arc, for example:
+	 *
+	 *  new Arc({
+	 *    start: [3.25, 7.25],
+	 *    end:   [5.2956871696824805, 10.324585901929941],
+	 *    radius: 3.333333333333333,
+	 *    large: false,
+	 *    clockwise: true 
+	 *   });
+	 * 
+	 * Up to this point, the unit arc we intent to return, ua, will be an
+	 * Arc where start.x == 1.0000000000000002 (at least on some machines). 
+	 * For operations which depend on unit arcs (such as walkSingle), this
+	 * will cause errors due to invalid trig operations being performed, in
+	 * this example: Math.acos(-1.0000000000000002) which === NaN.
+	 *
+	 * This nasty hack makes sure the unit arc we return has all components
+	 * no greater than 1.
+	 */
+	
+	if( ua.start._x > 1  ) { ua.start._x=1; }
+	if( ua.start._x < -1 ) { ua.start._x=-1; }
+	if( ua.start._y > 1  ) { ua.start._y=1; }
+	if( ua.start._y < -1 ) { ua.start._y=-1; }
+	if( ua.end._x > 1  )   { ua.end._x=1; }
+	if( ua.end._x < -1 )   { ua.end._x=-1; }
+	if( ua.end._y > 1  )   { ua.end._y=1; }
+	if( ua.end._y < -1 )   { ua.end._y=-1; }
+	
+	return ua;
 }
 
 // return a function which will xlate any point on this arc to where
