@@ -56,6 +56,12 @@ ShapeCollection.prototype.ymirror = function() {
 	);
 }
 
+ShapeCollection.prototype.xlate = function(dx,dy) {
+	return new ShapeCollection(
+		this._shapes.map( (s) => s.xlate(dx,dy) )
+	);
+}
+
 ShapeCollection.prototype.toArray = function() {
 	return this._shapes;
 }
