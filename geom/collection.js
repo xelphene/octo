@@ -5,6 +5,8 @@ var ShapeCollection = function(shapeArray) {
 	if( shapeArray===undefined ) {
 		this._shapes = [];
 	} else {
+		//console.log('my array:');
+		//shapeArray.map( (i) => console.log(i) );
 		this._shapes = shapeArray;
 	}
 }
@@ -62,8 +64,16 @@ ShapeCollection.prototype.xlate = function(dx,dy) {
 	);
 }
 
+ShapeCollection.prototype.setShapeClass = function(shapeClass) {
+	//var sc = new ShapeCollection;
+	return new ShapeCollection(
+		this._shapes.map( (s) => s.setShapeClass(shapeClass) )
+	);
+}
+
 ShapeCollection.prototype.toArray = function() {
 	return this._shapes;
 }
+
 
 exports.ShapeCollection = ShapeCollection;
