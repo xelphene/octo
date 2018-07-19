@@ -117,6 +117,29 @@ Line.prototype.slope = function() {
 	return (this.end.y - this.start.y) / (this.end.x - this.start.x);
 };
 
+Line.prototype.intersection = function(other) 
+{
+	// based on
+	// https://www.geeksforgeeks.org/program-for-point-of-intersection-of-two-lines/
+	var a1 = this.end.y - this.start.y;
+	var b1 = this.start.x - this.end.x;
+	var c1 = a1*this.start.x + b1*this.start.y;
+	
+	var a2 = other.end.y - other.start.y;
+	var b2 = other.start.x - other.end.x;
+	var c2 = a2*other.start.x + b2*other.start.y;
+	
+	var d = a1*b2 - a2*b1;
+	if( d==0 ) {
+		throw new Error("intersection() called on parallel lines");
+	}
+	
+	var x = (b2*c1 - b1*c2)/d;
+	var y = (a1*c2 - a2*c1)/d;
+
+	return new Point(x,y);
+}
+
 Line.prototype.toString = function() {
 	//return 'Line '+this.start.x+','+this.start.y+' -> '+this.end.x+','+this.end.y;
 	return 'Line '+this.start.toStringShort()+' -> '+this.end.toStringShort();
@@ -125,6 +148,10 @@ Line.prototype.toString = function() {
 Line.prototype.isVertical = function() {
 	return this.start.x==this.end.x;
 };
+
+Line.prototype.isHorizontal = function() {
+	return this.start.y==this.end.y;
+}
 
 Line.prototype.scaleBy = function(s) {
 	return new Line({
@@ -312,6 +339,82 @@ Line.prototype.reverse = function() {
 	return new Line(this.end, this.start);
 }
 
+Object.defineProperty(Line.prototype, 'highestEndPoint', {
+	get: function() {
+		if( this.isHorizontal() ) {
+			throw new Error('Line.highestEndPoint is not valid on a horizontal line.');
+		}
+		if( this.start.y > this.end.y ) {
+			return new LinePoint(this.start.x, this.start.y, this);
+		} else {
+			return new LinePoint(this.end.x, this.end.y, this);
+		}
+	}
+});
+
+Object.defineProperty(Line.prototype, 'lowestEndPoint', {
+	get: function() {
+		if( this.isHorizontal() ) {
+			throw new Error('Line.highestEndPoint is not valid on a horizontal line.');
+		}
+		if( this.start.y < this.end.y ) {
+			return new LinePoint(this.start.x, this.start.y, this);
+		} else {
+			return new LinePoint(this.end.x, this.end.y, this);
+		}
+	}
+});
+
+Object.defineProperty(Line.prototype, 'leftmostEndPoint', {
+	get: function() {
+		if( this.isVertical() ) {
+			throw new Error('Line.lowestEndPoint is not valid on a vertical line.');
+		}
+		if( this.start.x < this.end.x ) {
+			return new LinePoint(this.start.x, this.start.y, this);
+		} else {
+			return new LinePoint(this.end.x, this.end.y, this);
+		}
+	}
+});
+
+Object.defineProperty(Line.prototype, 'rightmostEndPoint', {
+	get: function() {
+		if( this.isVertical() ) {
+			throw new Error('Line.lowestEndPoint is not valid on a vertical line.');
+		}
+		if( this.start.x > this.end.x ) {
+			return new LinePoint(this.start.x, this.start.y, this);
+		} else {
+			return new LinePoint(this.end.x, this.end.y, this);
+		}
+	}
+});
+
+/* less clear than above 
+Object.defineProperty(Line.prototype, 'leftmostEndPoint', {
+	get: function() { return this.getHorizontalEndPoint(false) }
+});
+Object.defineProperty(Line.prototype, 'rightmostEndPoint', {
+	get: function() { return this.getHorizontalEndPoint(true) }
+});
+
+function xor(a,b) {
+	return (a||b) && ! ( a && b );
+}
+
+Line.prototype.getHorizontalEndPoint = function(sense) {
+	if( this.isVertical() ) {
+		throw new Error('operation is not valid on a vertical line.');
+	}
+	if( xor(this.start.x > this.end.x, sense) ) {
+		return new LinePoint(this.start.x, this.start.y, this);
+	} else {
+		return new LinePoint(this.end.x, this.end.y, this);
+	}
+}
+*/
+
 // **********************************************************
 
 var LinePoint = function(x,y,line) {
@@ -366,6 +469,7 @@ var LineStepPoint = function({x,y,line,stepIndex,stepMax}) {
 	LinePoint.apply(this,[x,y,line]);
 	this.stepIndex = stepIndex;
 	this.stepMax = stepMax;
+	this.vector = line.toUnitVector();
 }
 
 LineStepPoint.prototype = Object.create(LinePoint.prototype);
@@ -377,6 +481,20 @@ LineStepPoint.prototype.isFirst = function() {
 LineStepPoint.prototype.isLast = function() {
 	return this.stepIndex==this.stepMax;
 }
+
+LineStepPoint.prototype.xlateForward = function(dist) { 
+	return this.xlateUnitVector(this.vector, dist);
+}
+LineStepPoint.prototype.xlateBackward = function(dist) {
+	return this.xlateUnitVector(this.vector, -dist);
+}
+LineStepPoint.prototype.xlateLeft = function(dist) {
+	return this.xlateUnitVector(this.vector.rotate90ccw(), dist);
+}
+LineStepPoint.prototype.xlateRight = function(dist) { 
+	return this.xlateUnitVector(this.vector.rotate90cw(), dist);
+}
+
 
 // **********************************************************
 
