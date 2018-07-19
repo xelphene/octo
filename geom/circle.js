@@ -196,6 +196,12 @@ Circle.prototype.isPointOn = function(p) {
 	return diff < 0.00001;
 }
 
+Object.defineProperty(Circle.prototype, 'circumf', {
+	get: function() {
+		return this.radius*Math.PI*2;
+	}
+});
+
 // ***********************************************************
 
 CirclePoint = function(x,y,circle) {
@@ -303,6 +309,41 @@ CirclePoint.prototype.xlateAlongCounterCW = function (distance) {
 	return this.xlateAlong(distance, false)
 }
 
+CirclePoint.prototype.walk = function({
+	clockwise, stepDistance, minDistance, maxDistance,
+	maxPoints
+}) {
+	if( minDistance===undefined ) { minDistance=0; }
+	if( maxDistance===undefined ) { maxDistance=this.circle.circumf; }
+	if( maxPoints===undefined   ) { maxPoints=Infinity; }
+
+	return {
+		map: (f) => 
+		{
+			var p=this;
+			var cur=0;
+			var numPoints=1;
+			while( cur <= maxDistance && numPoints<=maxPoints ) {
+				if( cur >= minDistance ) {
+					//f('222');
+					f(p);
+					numPoints+=1;
+				}
+				p = p.xlateAlong(stepDistance, clockwise);
+				cur += stepDistance;
+			}
+		},
+		get: function()
+		{
+			var a = [];
+			this.map( (p) => {
+				a.push(p);
+			});
+			return a;
+		}
+	}
+}
+
 // ***********************************************************
 
 /* given two points (a, b) that lie on a circle, and a unit vector u which
@@ -333,4 +374,5 @@ function circleFromPointsUV(a,b,u) {
 
 
 exports.Circle = Circle;
+exports.CirclePoint = CirclePoint;
 exports.circleFromPointsUV = circleFromPointsUV;

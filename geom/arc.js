@@ -1,6 +1,7 @@
 
 const Point = require('./point').Point;
 const Circle = require('./circle').Circle;
+const CirclePoint = require('./circle').CirclePoint;
 const circleFromPointsUV = require('./circle').circleFromPointsUV;
 const Shape = require('./shape').Shape;
 const Line  = require('./line').Line;
@@ -370,7 +371,6 @@ Arc.prototype.isUnitArc = function()
 		this.center().y < 0.00001
 	);
 	
-	return this.radius==1 && this.center().x==0 && this.center().y==0;
 }
 
 Arc.prototype.unitArc = function()
@@ -439,6 +439,11 @@ Arc.prototype.xlateFromUnitArc = function(p)
 		p.x*this.radius + this.center().x,
 		p.y*this.radius + this.center().y
 	);	
+}
+
+Arc.prototype.getMidArcPoint = function() {
+	var p = this.midPoint();
+	return new ArcPoint(p.x, p.y, this);
 }
 
 Arc.prototype.midPoint = function() {
@@ -782,8 +787,12 @@ ArcPoint.prototype.xlatePerpCardinal = function(distance, dirPref1, dirPref2) {
 }
 
 // re: walkSingle
-ArcPoint.prototype.xlateAlong = function(distance)
+ArcPoint.prototype.xlateAlong = function(distance, clockwise)
 {
+	if( clockwise===undefined ) {
+		clockwise = this.arc.clockwise;
+	}
+	
 	if( ! this.arc.isUnitArc() ) {
 		//throw new Error('not sure');
 		
@@ -794,7 +803,7 @@ ArcPoint.prototype.xlateAlong = function(distance)
 		
 		//var p = this.unitArc().walkSingle( distance*(1/this.radius), forwards );
 
-		var p = newArcPoint.xlateAlong(newDistance);
+		var p = newArcPoint.xlateAlong(newDistance, clockwise);
 
 		// takes a point, returns a new point
 		return new ArcPoint(
@@ -809,6 +818,10 @@ ArcPoint.prototype.xlateAlong = function(distance)
 	 * toward end) */
 	
 	var startPoint = this;
+
+	//if( clockwise ) {
+	//	distance = -distance;
+	//}
 
 	// get the angle of a line from center to start point in radians
 	var startAngle;	
@@ -828,7 +841,7 @@ ArcPoint.prototype.xlateAlong = function(distance)
 	
 	/* finding the point a certain distance from the start point is simply a
 	 * matter of adding the distance to the angle as measured in radians */
-	if( this.clockwise ) {
+	if( clockwise ) {
 		var x = Math.cos( startAngle - distance );
 		var y = Math.sin( startAngle - distance );
 	} else {
@@ -839,6 +852,113 @@ ArcPoint.prototype.xlateAlong = function(distance)
 	return new ArcPoint(x,y,this.arc);
 }
 
+ArcPoint.prototype.walk = function({clockwise, stepDistance, maxDistance, maxPoints}) 
+{
+	if( stepDistance===undefined ) {
+		throw new Error('stepDistance must be specified.');
+	}
+
+	/* if clockwise is null, check if we're at start or end point and set
+	* intellegently to go in the only possible direction.  otherwise, if at
+	* a point in the middle, default to CCW. */
+	if( clockwise===undefined ) {
+		if( this.equals(this.arc.getStartArcPoint()) ) {
+			clockwise = this.arc.clockwise;
+		} else if( this.equals(this.arc.getEndArcPoint()) )  {
+			clockwise = ! this.arc.clockwise;
+		} else {
+			clockwise=this.arc.clockwise;
+		}
+		//console.log('autoclockwise = '+clockwise);
+	}
+	
+	//console.log('clockwise: '+clockwise);
+	
+	if( clockwise == this.arc.clockwise ) {
+		var towardsPoint = this.arc.getEndArcPoint();
+	} else {
+		var towardsPoint = this.arc.getStartArcPoint();
+	}
+	
+	//console.log('towardsPoint: '+towardsPoint);
+
+	/* find the absolute maximum distance we can walk (i.e. from here to
+	 * either start point or end point */
+
+	var absMaxDistance = new Arc({
+		start: this,
+		end: towardsPoint,
+		radius: this.arc.radius,
+		clockwise: this.arc.clockwise,
+		large: this.arc.large
+	}).length;
+	//console.log('absMaxDistance: '+absMaxDistance);	
+
+	var absMaxPoints = absMaxDistance / stepDistance;
+
+	if( maxDistance!==undefined && maxPoints===undefined ) {
+		if( maxDistance > absMaxDistance ) {
+			maxDistance = absMaxDistance;
+		}
+		maxPoints = Math.floor(maxDistance/stepDistance);
+	} else if( maxDistance===undefined && maxPoints!==undefined ) {
+		if( maxPoints > absMaxPoints ) {
+			maxPoints = absMaxPoints
+		}
+		var maxDistance = maxPoints*stepDistance;
+	} else if( maxDistance===undefined && maxPoints===undefined ) {
+		maxDistance = absMaxDistance;
+		maxPoints = Math.floor(maxDistance/stepDistance);
+	} else {
+		throw new Error("maxDistance may be specified or maxPoints may be specified but not both");
+	}
+
+	//console.log('maxPoints: '+maxPoints);
+	//console.log('maxDistance: '+maxDistance);
+
+
+	/* this is needed for the generator function below. generator functions
+	 * always have their 'this' rebound.  there's no "generator arrow
+	 * function" which doesn't have a special 'this'. */
+	var thisArcPoint = this;
+
+	return {
+		map: function(f)
+		{
+			for( let p of this.iter() ) {
+				f(p)
+			}
+		},
+		get: function()
+		{
+			var a = [];
+			this.map( (p) => {
+				a.push(p);
+			});
+			return a;
+		},
+		iter: function*()
+		{
+			var p = thisArcPoint.xlateAlong(stepDistance, clockwise);
+			var numPoints=1;
+			while( numPoints <= maxPoints ) {
+				yield new ArcStepPoint({
+					x: p.x, y: p.y,
+					arc: p.arc,
+					stepIndex: numPoints-1, stepMax: maxPoints-1
+				});
+				numPoints+=1;
+				p = thisArcPoint.xlateAlong(stepDistance*numPoints, clockwise);
+			}
+		}
+	}
+
+	 
+}
+
+ArcPoint.prototype.getCirclePoint = function() {
+	return new CirclePoint(this.x, this.y, this.arc.getCircle()	);
+}
 
 // **********************************************************
 
