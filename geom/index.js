@@ -32,6 +32,48 @@ function circleFromPoints( a, b, c ) {
 	};
 };
 
+function pointNearestLine(l,p) 
+{
+	var A = p.x - l.start.x;
+	var B = p.y - l.start.y;
+	var C = l.end.x - l.start.x;
+	var D = l.end.y - l.start.y;
+	
+	var dot = A*C + B*D;
+	var len_sq = C*C + D*D;
+	var param = -1;
+	if( len_sq != 0 ) // line length==0 
+	{
+		param = dot / len_sq;
+	}
+	
+	if( param<0 ) {
+		console.log('case1');
+		var xx = l.start.x; //x1;
+		var yy = l.start.y; //y1;
+	} else if( param > 1 ) {	
+		console.log('case2');
+		var xx = l.end.x; //x2;
+		var yy = l.end.y; //y2;
+	} else {
+		console.log('case3');
+		var xx = l.start.x + param*C;
+		var yy = l.start.y + param*D;
+	}
+	
+	return new Point(xx,yy);
+	/*
+	console.log('xx='+xx+' yy='+yy);
+	
+	var dx = p.x - xx;
+	var dy = p.y - yy;
+
+	console.log('dx='+dx+' dy='+dy);
+
+	return Math.sqrt(dx*dx + dy*dy);
+	*/
+}
+
 function extractShapesFromObject(obj, onUnknown) {
 	var rv = [];
 	if( typeof(obj)=='object' ) {
@@ -73,6 +115,7 @@ exports.Shape = Shape;
 exports.extractShapesFromObject = extractShapesFromObject;
 exports.Circle = Circle;
 exports.ShapeCollection = ShapeCollection;
+exports.pointNearestLine = pointNearestLine;
 
 exports.point = require('./point');
 exports.line = require('./line');
